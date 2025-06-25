@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block title %}تقرير {{ employee.name }} - نظام إدارة الموظفين{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 text-primary">
+                        <i class="fas fa-user-chart me-2"></i>
+                        تقرير مفصل للموظف
+                    </h1>
+                    <p class="text-muted">{{ employee.name }} - {{ employee.emp_no }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'employees:export_individual_report' employee.pk %}" class="btn btn-success">
+                        <i class="fas fa-file-excel me-2"></i>
+                        تصدير التقرير
+                    </a>
+                    <a href="{% url 'employees:employee_detail' employee.pk %}" class="btn btn-info">
+                        <i class="fas fa-user me-2"></i>
+                        عرض الملف الشخصي
+                    </a>
+                    <a href="{% url 'employees:reports' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        العودة للتقارير
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Summary -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        ملخص الموظف
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-primary">{{ report_data.totals.basic_salary|floatformat:2 }}</div>
+                                <div class="stats-label">الراتب الأساسي (ريال)</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-success">{{ report_data.totals.monthly_gross|floatformat:2 }}</div>
+                                <div class="stats-label">الراتب الإجمالي الشهري (ريال)</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-info">{{ report_data.totals.annual_gross|floatformat:2 }}</div>
+                                <div class="stats-label">التكلفة السنوية (ريال)</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-warning">{{ report_data.totals.cost_factor|floatformat:2 }}</div>
+                                <div class="stats-label">المعامل</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cost Breakdown Chart -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-pie-chart me-2"></i>
+                        توزيع التكاليف الشهرية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyCostChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        مقارنة التكاليف
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="costComparisonChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Allowances -->
+    {% if report_data.monthly_allowances %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        البدلات الشهرية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>نوع البدل</th>
+                                    <th>المبلغ الشهري</th>
+                                    <th>النوع</th>
+                                    <th>المبلغ السنوي</th>
+                                    <th>النسبة من الراتب الأساسي</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for allowance_name, data in report_data.monthly_allowances.items %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-primary">{{ allowance_name }}</span>
+                                    </td>
+                                    <td class="text-end">{{ data.amount|floatformat:2 }} ريال</td>
+                                    <td>
+                                        <span class="badge {% if data.type == 'نقدي' %}bg-success{% else %}bg-info{% endif %}">
+                                            {{ data.type }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">{{ data.annual_total|floatformat:2 }} ريال</td>
+                                    <td class="text-end">
+                                        {{ report_data.totals.basic_salary}}%
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-secondary">
+                                <tr>
+                                    <th>الإجمالي</th>
+                                    <th class="text-end">{{ report_data.totals.monthly_allowances|floatformat:2 }} ريال</th>
+                                    <th>--</th>
+                                    <th class="text-end">{{ report_data.totals.monthly_allowances_annual|floatformat:2 }} ريال</th>
+                                    <th class="text-end">
+                                        {{ report_data.totals.basic_salary }}%
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Annual Allowances -->
+    {% if report_data.annual_allowances %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar me-2"></i>
+                        البدلات السنوية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>نوع البدل</th>
+                                    <th>المبلغ السنوي</th>
+                                    <th>النوع</th>
+                                    <th>المعادل الشهري</th>
+                                    <th>النسبة من الراتب السنوي</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for allowance_name, data in report_data.annual_allowances.items %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-warning">{{ allowance_name }}</span>
+                                    </td>
+                                    <td class="text-end">{{ data.amount|floatformat:2 }} ريال</td>
+                                    <td>
+                                        <span class="badge {% if data.type == 'نقدي' %}bg-success{% else %}bg-info{% endif %}">
+                                            {{ data.type }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">{{ data.monthly_equivalent|floatformat:2 }} ريال</td>
+                                    <td class="text-end">
+                                        {{ report_data.totals.annual_allowances}}%
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-secondary">
+                                <tr>
+                                    <th>الإجمالي</th>
+                                    <th class="text-end">{{ report_data.totals.annual_allowances|floatformat:2 }} ريال</th>
+                                    <th>--</th>
+                                    <th class="text-end">{{ report_data.totals.monthly_equivalent_annual_allowances|floatformat:2 }} ريال</th>
+                                    <th class="text-end">
+                                        {{ report_data.totals.annual_allowances }}%
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- One-time Costs -->
+    {% if report_data.one_time_costs %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-dollar-sign me-2"></i>
+                        التكاليف لمرة واحدة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>نوع التكلفة</th>
+                                    <th>المبلغ</th>
+                                    <th>النوع</th>
+                                    <th>النسبة من الراتب السنوي</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cost_name, data in report_data.one_time_costs.items %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-danger">{{ cost_name }}</span>
+                                    </td>
+                                    <td class="text-end">{{ data.amount|floatformat:2 }} ريال</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ data.type }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        {{ employee.basic_salary  }}%
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Final Summary -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calculator me-2"></i>
+                        الملخص النهائي للتكاليف
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-lg">
+                            <tbody>
+                                <tr>
+                                    <td><strong>الراتب الأساسي الشهري</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.basic_salary|floatformat:2 }} ريال</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>البدلات الشهرية</td>
+                                    <td class="text-end">{{ report_data.totals.monthly_allowances|floatformat:2 }} ريال</td>
+                                </tr>
+                                <tr>
+                                    <td>البدلات السنوية (معادل شهري)</td>
+                                    <td class="text-end">{{ report_data.totals.annual_allowances}} ريال</td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td><strong>إجمالي الراتب الشهري</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.monthly_gross|floatformat:2 }} ريال</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>إجمالي الراتب السنوي</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.annual_gross|floatformat:2 }} ريال</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>تكلفة الاستقدام</td>
+                                    <td class="text-end">{{ report_data.totals.recruitment_cost|floatformat:2 }} ريال</td>
+                                </tr>
+                                <tr>
+                                    <td>تكلفة التدريب</td>
+                                    <td class="text-end">{{ report_data.totals.training_cost|floatformat:2 }} ريال</td>
+                                </tr>
+                                <tr>
+                                    <td>التكاليف لمرة واحدة (البدلات)</td>
+                                    <td class="text-end">{{ report_data.totals.one_time_costs|floatformat:2 }} ريال</td>
+                                </tr>
+                                <tr class="table-success">
+                                    <td><strong>إجمالي التكلفة السنوية</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.total_annual_cost|floatformat:2 }} ريال</strong></td>
+                                </tr>
+                                <tr class="table-info">
+                                    <td><strong>المعامل (التكلفة السنوية ÷ الراتب الأساسي السنوي)</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.cost_factor|floatformat:2 }}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // بيانات المخطط الدائري للتكاليف الشهرية
+    const monthlyData = {
+        'الراتب الأساسي': {{ report_data.totals.basic_salary|floatformat:2 }},
+        'البدلات الشهرية': {{ report_data.totals.monthly_allowances|floatformat:2 }},
+        'البدلات السنوية (معادل شهري)': {{ report_data.totals.annual_allowances }}
+    };
+    
+    const monthlyLabels = Object.keys(monthlyData);
+    const monthlyValues = Object.values(monthlyData);
+    
+    // رسم بياني دائري للتكاليف الشهرية
+    const monthlyCtx = document.getElementById('monthlyCostChart').getContext('2d');
+    new Chart(monthlyCtx, {
+        type: 'doughnut',
+        data: {
+            labels: monthlyLabels,
+            datasets: [{
+                data: monthlyValues,
+                backgroundColor: ['#007bff', '#28a745', '#ffc107'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed.toLocaleString() + ' ريال';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // رسم بياني عمودي للمقارنة
+    const comparisonData = {
+        'الراتب الأساسي': {{ report_data.totals.basic_salary|floatformat:2 }},
+        'الراتب الإجمالي': {{ report_data.totals.monthly_gross|floatformat:2 }},
+        'التكلفة مع البدلات السنوية': {{ report_data.totals.monthly_gross|floatformat:2 }}
+    };
+    
+    const comparisonCtx = document.getElementById('costComparisonChart').getContext('2d');
+    new Chart(comparisonCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(comparisonData),
+            datasets: [{
+                label: 'المبلغ (ريال)',
+                data: Object.values(comparisonData),
+                backgroundColor: ['#dc3545', '#17a2b8', '#6f42c1'],
+                borderColor: ['#c82333', '#138496', '#5a32a3'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString() + ' ريال';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y.toLocaleString() + ' ريال';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

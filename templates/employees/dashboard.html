@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}لوحة التحكم - نظام إدارة الموظفين{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 text-primary">
+                <i class="fas fa-tachometer-alt me-2"></i>
+                لوحة التحكم
+            </h1>
+            <p class="text-muted">نظرة عامة على بيانات الموظفين والإحصائيات</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card text-center">
+                <div class="stats-number">{{ total_employees }}</div>
+                <div class="stats-label">إجمالي الموظفين</div>
+                <i class="fas fa-users fa-3x text-primary mt-3"></i>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card text-center">
+                <div class="stats-number text-success">{{ total_monthly_cost|floatformat:0 }}</div>
+                <div class="stats-label">التكلفة الشهرية (ريال)</div>
+                <i class="fas fa-calendar-alt fa-3x text-success mt-3"></i>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card text-center">
+                <div class="stats-number text-info">{{ total_annual_cost|floatformat:0 }}</div>
+                <div class="stats-label">التكلفة السنوية (ريال)</div>
+                <i class="fas fa-chart-line fa-3x text-info mt-3"></i>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card text-center">
+                <div class="stats-number text-warning">{{ category_stats|length }}</div>
+                <div class="stats-label">فئات الموظفين</div>
+                <i class="fas fa-layer-group fa-3x text-warning mt-3"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        الإجراءات السريعة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'employees:employee_create' %}" class="btn btn-primary w-100 py-3">
+                                <i class="fas fa-user-plus fa-2x d-block mb-2"></i>
+                                إضافة موظف جديد
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'employees:employee_list' %}" class="btn btn-info w-100 py-3">
+                                <i class="fas fa-list fa-2x d-block mb-2"></i>
+                                عرض جميع الموظفين
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'employees:reports' %}" class="btn btn-success w-100 py-3">
+                                <i class="fas fa-chart-bar fa-2x d-block mb-2"></i>
+                                عرض التقارير
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'employees:import_excel' %}" class="btn btn-warning w-100 py-3">
+                                <i class="fas fa-file-excel fa-2x d-block mb-2"></i>
+                                استيراد من Excel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-pie-chart me-2"></i>
+                        توزيع الموظفين حسب الفئة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        توزيع الموظفين حسب الجنسية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="nationalityChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Employees -->
+    {% if recent_employees %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock me-2"></i>
+                        الموظفين الجدد (آخر 30 يوم)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>رقم الموظف</th>
+                                    <th>الاسم</th>
+                                    <th>الجنسية</th>
+                                    <th>الفئة</th>
+                                    <th>تاريخ التوظيف</th>
+                                    <th>الراتب الأساسي</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in recent_employees %}
+                                <tr>
+                                    <td>{{ employee.employee_number }}</td>
+                                    <td>{{ employee.name }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ employee.nationality }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ employee.get_category_display }}</span>
+                                    </td>
+                                    <td>{{ employee.hire_date|date:"Y-m-d" }}</td>
+                                    <td>{{ employee.basic_salary|floatformat:2 }} ريال</td>
+                                    <td>
+                                        <a href="{% url 'employees:employee_detail' employee.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'employees:employee_edit' employee.pk %}" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // بيانات الرسم البياني للفئات
+    const categoryData = {{ category_stats|safe }};
+    const categoryLabels = categoryData.map(item => item.name);
+    const categoryValues = categoryData.map(item => item.count);
+    const categoryColors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1'];
+    
+    // رسم بياني دائري للفئات
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryValues,
+                backgroundColor: categoryColors,
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                }
+            }
+        }
+    });
+    
+    // بيانات الرسم البياني للجنسيات
+    const nationalityData = {{ nationality_stats|safe }};
+    const nationalityLabels = nationalityData.map(item => item.name);
+    const nationalityValues = nationalityData.map(item => item.count);
+    
+    // رسم بياني عمودي للجنسيات
+    const nationalityCtx = document.getElementById('nationalityChart').getContext('2d');
+    new Chart(nationalityCtx, {
+        type: 'bar',
+        data: {
+            labels: nationalityLabels,
+            datasets: [{
+                label: 'عدد الموظفين',
+                data: nationalityValues,
+                backgroundColor: '#007bff',
+                borderColor: '#0056b3',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

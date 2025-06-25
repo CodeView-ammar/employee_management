@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}التقارير المتقدمة - نظام إدارة الموظفين{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 text-primary">
+                        <i class="fas fa-chart-line me-2"></i>
+                        التقارير المالية المتقدمة
+                    </h1>
+                    <p class="text-muted">تقارير شاملة مع إمكانات بحث وتصفية متقدمة</p>
+                </div>
+                <div>
+                    <a href="{% url 'employees:export_excel' %}{% if filters %}?{% for key, value in filters.items %}{{ key }}={{ value }}{% if not forloop.last %}&{% endif %}{% endfor %}{% endif %}" class="btn btn-success">
+                        <i class="fas fa-file-excel me-2"></i>
+                        تصدير التقرير
+                    </a>
+                    <a href="{% url 'employees:comparison_report' %}" class="btn btn-info">
+                        <i class="fas fa-balance-scale me-2"></i>
+                        تقرير المقارنة
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-filter me-2"></i>
+                        البحث والتصفية المتقدمة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{% url 'employees:reports' %}">
+                        <div class="row">
+                            <!-- البحث العام -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label class="form-label">{{ form.employee_search.label }}</label>
+                                {{ form.employee_search }}
+                            </div>
+                            
+                            <!-- حالة النشاط -->
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label class="form-label">{{ form.is_active.label }}</label>
+                                {{ form.is_active }}
+                            </div>
+                            
+                            <!-- الفئة -->
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label class="form-label">{{ form.category.label }}</label>
+                                {{ form.category }}
+                            </div>
+                            
+                            <!-- الجنسية -->
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <label class="form-label">{{ form.nationality.label }}</label>
+                                {{ form.nationality }}
+                            </div>
+                            
+                            <!-- من تاريخ -->
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <label class="form-label">{{ form.date_from.label }}</label>
+                                {{ form.date_from }}
+                            </div>
+                            
+                            <!-- إلى تاريخ -->
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <label class="form-label">{{ form.date_to.label }}</label>
+                                {{ form.date_to }}
+                            </div>
+                            
+                            <!-- نطاق الراتب -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label class="form-label">{{ form.salary_min.label }}</label>
+                                {{ form.salary_min }}
+                            </div>
+                            
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label class="form-label">{{ form.salary_max.label }}</label>
+                                {{ form.salary_max }}
+                            </div>
+                            
+                            <!-- أزرار التحكم -->
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>
+                                    تطبيق المرشحات
+                                </button>
+                                <a href="{% url 'employees:reports' %}" class="btn btn-secondary">
+                                    <i class="fas fa-undo me-2"></i>
+                                    إعادة تعيين
+                                </a>
+                                {% if report_data.filter_applied %}
+                                    <span class="badge bg-info ms-2">
+                                        تم العثور على {{ report_data.total_filtered }} موظف
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">إجمالي الموظفين</h4>
+                            <h2 class="mb-0">{{ report_data.summary.total_employees }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">التكلفة الشهرية</h4>
+                            <h2 class="mb-0">{{ report_data.summary.total_monthly_cost|floatformat:0 }}</h2>
+                            <small>ريال سعودي</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-alt fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">التكلفة السنوية</h4>
+                            <h2 class="mb-0">{{ report_data.summary.total_annual_cost|floatformat:0 }}</h2>
+                            <small>ريال سعودي</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">متوسط المعامل</h4>
+                            <h2 class="mb-0">{{ report_data.summary.avg_cost_factor|floatformat:2 }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calculator fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-pie-chart me-2"></i>
+                        توزيع التكاليف حسب الفئة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        توزيع الموظفين حسب الجنسية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="nationalityChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Employee Report -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-table me-2"></i>
+                        التقرير المفصل للموظفين
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if report_data.employees %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="detailedReport">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>رقم الموظف</th>
+                                        <th>الاسم</th>
+                                        <th>الجنسية</th>
+                                        <th>الفئة</th>
+                                        <th>تاريخ التوظيف</th>
+                                        <th>الراتب الأساسي</th>
+                                        <th>البدلات الشهرية</th>
+                                        <th>الراتب الإجمالي</th>
+                                        <th>التكلفة السنوية</th>
+                                        <th>المعامل</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for employee in report_data.employees %}
+                                        <tr>
+                                            <td>
+                                                <a href="{% url 'employees:employee_detail' employee.pk %}" class="text-decoration-none">
+                                                    {{ employee.employee_number }}
+                                                </a>
+                                            </td>
+                                            <td>{{ employee.name }}</td>
+                                            <td>
+                                                <span class="badge bg-info">{{ employee.nationality }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ employee.get_category_display }}</span>
+                                            </td>
+                                            <td>{{ employee.hire_date|date:"Y-m-d" }}</td>
+                                            <td class="text-end">{{ employee.basic_salary|floatformat:2 }}</td>
+                                            <td class="text-end">{{ employee.get_total_monthly_allowances|floatformat:2 }}</td>
+                                            <td class="text-end">{{ employee.get_monthly_gross_salary|floatformat:2 }}</td>
+                                            <td class="text-end">{{ employee.get_annual_total_cost|floatformat:2 }}</td>
+                                            <td class="text-end">{{ employee.get_cost_factor|floatformat:2 }}</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'employees:employee_individual_report' employee.pk %}" 
+                                                       class="btn btn-sm btn-outline-success" 
+                                                       data-bs-toggle="tooltip" title="تقرير مفصل">
+                                                        <i class="fas fa-chart-line"></i>
+                                                    </a>
+                                                    <a href="{% url 'employees:employee_detail' employee.pk %}" 
+                                                       class="btn btn-sm btn-outline-primary" 
+                                                       data-bs-toggle="tooltip" title="عرض التفاصيل">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <!-- <a href="{% url 'employees:employee_edit' employee.pk %}" 
+                                                       class="btn btn-sm btn-outline-warning" 
+                                                       data-bs-toggle="tooltip" title="تعديل">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a> -->
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-5x text-muted mb-3"></i>
+                            <h3 class="text-muted">لا توجد نتائج</h3>
+                            <p class="text-muted">لم يتم العثور على موظفين يطابقون معايير البحث المحددة</p>
+                            <a href="{% url 'employees:reports' %}" class="btn btn-primary">
+                                <i class="fas fa-undo me-2"></i>
+                                إعادة تعيين المرشحات
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // بيانات الرسم البياني للفئات
+    const categoryData = {{ report_data.by_category|safe }};
+    const categoryLabels = Object.keys(categoryData);
+    const categoryValues = categoryLabels.map(cat => categoryData[cat].total_monthly);
+    
+    if (categoryLabels.length > 0) {
+        const ctx1 = document.getElementById('categoryChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    data: categoryValues,
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF',
+                        '#FF9F40'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed.toLocaleString() + ' ريال';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // بيانات الرسم البياني للجنسيات
+    const nationalityData = {{ report_data.by_nationality|safe }};
+    const nationalityLabels = Object.keys(nationalityData);
+    const nationalityValues = nationalityLabels.map(nat => nationalityData[nat].count);
+    
+    if (nationalityLabels.length > 0) {
+        const ctx2 = document.getElementById('nationalityChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: nationalityLabels,
+                datasets: [{
+                    label: 'عدد الموظفين',
+                    data: nationalityValues,
+                    backgroundColor: '#36A2EB',
+                    borderColor: '#1e88e5',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

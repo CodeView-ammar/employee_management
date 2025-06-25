@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+{% load math_filters %}
+
+{% block title %}تقرير المقارنة - نظام إدارة الموظفين{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 text-primary">
+                        <i class="fas fa-balance-scale me-2"></i>
+                        تقرير المقارنة بين الموظفين
+                    </h1>
+                    <p class="text-muted">مقارنة التكاليف والكفاءة بين الموظفين</p>
+                </div>
+                <div>
+                    <a href="{% url 'employees:reports' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        العودة للتقارير
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-filter me-2"></i>
+                        تصفية المقارنة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label class="form-label">{{ form.employee_search.label }}</label>
+                                {{ form.employee_search }}
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label class="form-label">{{ form.nationality.label }}</label>
+                                {{ form.nationality }}
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label class="form-label">{{ form.category.label }}</label>
+                                {{ form.category }}
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label class="form-label">من تاريخ</label>
+                                {{ form.date_from }}
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>
+                                    تطبيق المرشحات
+                                </button>
+                                <a href="{% url 'employees:comparison_report' %}" class="btn btn-secondary">
+                                    <i class="fas fa-undo me-2"></i>
+                                    إعادة تعيين
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        مقارنة التكاليف السنوية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="comparisonChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-table me-2"></i>
+                        جدول المقارنة التفصيلي
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if comparison_data %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>الترتيب</th>
+                                        <th>رقم الموظف</th>
+                                        <th>الاسم</th>
+                                        <th>الفئة</th>
+                                        <th>الجنسية</th>
+                                        <th>الراتب الأساسي</th>
+                                        <th>البدلات الشهرية</th>
+                                        <th>الراتب الإجمالي</th>
+                                        <th>التكلفة السنوية</th>
+                                        <th>المعامل</th>
+                                        <th>نسبة الكفاءة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for data in comparison_data %}
+                                        <tr {% if forloop.counter <= 3 %}class="table-warning"{% endif %}>
+                                            <td>
+                                                {% if forloop.counter == 1 %}
+                                                    <i class="fas fa-trophy text-warning"></i>
+                                                {% elif forloop.counter == 2 %}
+                                                    <i class="fas fa-medal text-secondary"></i>
+                                                {% elif forloop.counter == 3 %}
+                                                    <i class="fas fa-award text-warning"></i>
+                                                {% else %}
+                                                    {{ forloop.counter }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'employees:employee_detail' data.employee.pk %}" class="text-decoration-none">
+                                                    {{ data.employee.employee_number }}
+                                                </a>
+                                            </td>
+                                            <td>{{ data.employee.name }}</td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ data.employee.get_category_display }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ data.employee.nationality }}</span>
+                                            </td>
+                                            <td class="text-end">{{ data.basic_salary|floatformat:2 }}</td>
+                                            <td class="text-end">{{ data.monthly_allowances|floatformat:2 }}</td>
+                                            <td class="text-end">{{ data.monthly_gross|floatformat:2 }}</td>
+                                            <td class="text-end">
+                                                <strong>{{ data.annual_cost|floatformat:2 }}</strong>
+                                            </td>
+                                            <td class="text-end">{{ data.cost_factor|floatformat:2 }}</td>
+                                            <td class="text-end">
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar 
+                                                        {% if data.efficiency_ratio >= 0.5 %}bg-success
+                                                        {% elif data.efficiency_ratio >= 0.3 %}bg-warning
+                                                        {% else %}bg-danger{% endif %}" 
+                                                         role="progressbar" 
+                                                         style="width: {% widthratio data.efficiency_ratio 1 100 %}%">
+                                                        {{ data.efficiency_ratio|floatformat:2 }}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'employees:employee_individual_report' data.employee.pk %}" 
+                                                   class="btn btn-sm btn-outline-success" 
+                                                   data-bs-toggle="tooltip" title="تقرير مفصل">
+                                                    <i class="fas fa-chart-line"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Summary Statistics -->
+                        <div class="row mt-4">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5>أعلى تكلفة سنوية</h5>
+                                    <p class="text-danger h4">{{ comparison_data.0.annual_cost|floatformat:2 }} ريال</p>
+                                    <small class="text-muted">{{ comparison_data.0.employee.name }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5>أقل تكلفة سنوية</h5>
+                                    <p class="text-success h4">{{ comparison_data|last.annual_cost|floatformat:2 }} ريال</p>
+                                    <small class="text-muted">{{ comparison_data|last.employee.name }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5>متوسط التكلفة</h5>
+                                    {% with total_cost=0 count=comparison_data|length %}
+                                        {% for data in comparison_data %}
+                                            {% with total_cost=total_cost|add:data.annual_cost %}{% endwith %}
+                                        {% endfor %}
+                                        <p class="text-info h4">{{ total_cost|div:count|floatformat:2 }} ريال</p>
+                                    {% endwith %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5>عدد الموظفين</h5>
+                                    <p class="text-primary h4">{{ comparison_data|length }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-5x text-muted mb-3"></i>
+                            <h3 class="text-muted">لا توجد بيانات للمقارنة</h3>
+                            <p class="text-muted">لم يتم العثور على موظفين للمقارنة بينهم</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if comparison_data %}
+        // بيانات الرسم البياني
+        const employees = [{% for data in comparison_data %}'{{ data.employee.name|truncatechars:15 }}'{% if not forloop.last %},{% endif %}{% endfor %}];
+        const costs = [{% for data in comparison_data %}{{ data.annual_cost|floatformat:2 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+        
+        // الرسم البياني العمودي
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: employees,
+                datasets: [{
+                    label: 'التكلفة السنوية (ريال)',
+                    data: costs,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' ريال';
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'التكلفة السنوية: ' + context.parsed.y.toLocaleString() + ' ريال';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    {% endif %}
+});
+</script>
+{% endblock %}
