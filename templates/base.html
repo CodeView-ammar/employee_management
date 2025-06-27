@@ -1,18 +1,18 @@
+{% load i18n %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}نظام إدارة الموظفين{% endblock %}</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Custom CSS -->
-    {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -20,69 +20,86 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'employees:dashboard' %}">
-             <img src="{% static 'images/logo.png' %}" alt="شعار الشركة" style="height: 42px;width: 175px;" class="me-2">
-                    نظام إدارة الموظفين  
+                <img src="{% static 'images/logo.png' %}" alt="شعار الشركة" style="height: 42px;width: 175px;" class="me-2">
+                نظام إدارة الموظفين
             </a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
+
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'employees:dashboard' %}">
-                            <i class="fas fa-home me-1"></i>
-                            الرئيسية
+                            <i class="fas fa-home me-1"></i> الرئيسية
                         </a>
                     </li>
-                    <!-- <li class="nav-item">
-                        <a class="nav-link" href="{% url 'employees:employee_list' %}">
-                            <i class="fas fa-users me-1"></i>
-                            الموظفين
-                        </a>
-                    </li> -->
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-chart-bar me-1"></i>
-                            التقارير
+                            <i class="fas fa-chart-bar me-1"></i> التقارير
                         </a>
                         <ul class="dropdown-menu" style="text-align: right;">
                             <li><a class="dropdown-item" href="{% url 'employees:reports' %}">
-                                <i class="fas fa-chart-line me-2"></i>
-                                التقارير العامة
+                                <i class="fas fa-chart-line me-2"></i> التقارير العامة
                             </a></li>
                             <li><a class="dropdown-item" href="{% url 'employees:comparison_report' %}">
-                                <i class="fas fa-balance-scale me-2"></i>
-                                تقرير المقارنة
+                                <i class="fas fa-balance-scale me-2"></i> تقرير المقارنة
                             </a></li>
                             <li><a class="dropdown-item" href="{% url 'employees:advanced_excel_reports' %}">
-                                <i class="fas fa-file-excel me-2"></i>
-                                التقارير الشاملة (Excel)
+                                <i class="fas fa-file-excel me-2"></i> التقارير الشاملة (Excel)
                             </a></li>
                         </ul>
                     </li>
-                    <li class="nav-item dropdown" >
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-cog me-1"></i>
-                            الإعدادات
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cog me-1"></i> الإعدادات
                         </a>
                         <ul class="dropdown-menu" style="text-align: right;">
                             <li><a class="dropdown-item" href="{% url 'employees:import_excel' %}">
-                                <i class="fas fa-upload me-2"></i>
-                                استيراد Excel
+                                <i class="fas fa-upload me-2"></i> استيراد Excel
                             </a></li>
                             <li><a class="dropdown-item" href="/admin/">
-                                <i class="fas fa-tools me-2"></i>
-                                لوحة الإدارة
+                                <i class="fas fa-tools me-2"></i> لوحة الإدارة
                             </a></li>
-                        <li><a class="dropdown-item" href="{%url 'accounts:logout'%}">
-                            <i class="fas fa-sign-out-alt me-2"></i>
-                            تسجيل الخروج
-                        </a></li>
-
                         </ul>
                     </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-globe me-1"></i> {% if LANGUAGE_CODE == 'ar' %}العربية{% else %}English{% endif %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form action="{% url 'set_language' %}" method="post" class="dropdown-item-form">
+                                    {% csrf_token %}
+                                    <input name="next" type="hidden" value="{{ request.get_full_path }}" />
+                                    <button type="submit" name="language" value="ar" class="dropdown-item {% if LANGUAGE_CODE == 'ar' %}active{% endif %}">
+                                        العربية
+                                    </button>
+                                </form>
+                            </li>
+                            <li>
+                                <form action="{% url 'set_language' %}" method="post" class="dropdown-item-form">
+                                    {% csrf_token %}
+                                    <input name="next" type="hidden" value="{{ request.get_full_path }}" />
+                                    <button type="submit" name="language" value="en" class="dropdown-item {% if LANGUAGE_CODE == 'en' %}active{% endif %}">
+                                        English
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:logout' %}">
+                            <i class="fas fa-sign-out-alt me-1"></i> {% trans "Logout" %}
+                        </a>
+                    </li>
+
                 </ul>
             </div>
         </div>
@@ -124,20 +141,17 @@
     </footer>
 
     <!-- Loading Spinner -->
-    <div class="loading">
+    <div class="loading d-none">
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">جاري التحميل...</span>
         </div>
         <p class="mt-2">جاري معالجة الطلب...</p>
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom JS -->
     <script src="{% static 'js/main.js' %}"></script>
-    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -19,13 +19,16 @@ def employee_individual_report(request, employee_id):
     """تقرير مفصل لموظف واحد"""
     employee = get_object_or_404(Employee, pk=employee_id)
 
-    # حساب البدلات
+    # حساب البدلات حسب معادلات Excel
     allowances = employee.allowances.filter(is_active=True).select_related('allowance_type')
     
     monthly_allowances = {}
     annual_allowances = {}
     one_time_costs = {}
+    biennial_allowances = {}
+    custom_allowances = {}
 
+    # تصنيف البدلات حسب التكرار
     for allowance in allowances:
         allowance_type = allowance.allowance_type.name_arabic
         
@@ -33,13 +36,31 @@ def employee_individual_report(request, employee_id):
             monthly_allowances[allowance_type] = {
                 'amount': allowance.amount,
                 'type': allowance.get_type_display(),
-                'annual_total': allowance.amount * 12
+                'annual_total': allowance.amount * Decimal('12'),
+                'monthly_equivalent': allowance.amount
             }
         elif allowance.allowance_type.frequency == 'ANNUAL':
             annual_allowances[allowance_type] = {
                 'amount': allowance.amount,
                 'type': allowance.get_type_display(),
-                'monthly_equivalent': allowance.amount / Decimal('12')
+                'monthly_equivalent': allowance.amount / Decimal('12'),
+                'annual_total': allowance.amount
+            }
+        elif allowance.allowance_type.frequency == 'BIENNIAL':
+            biennial_allowances[allowance_type] = {
+                'amount': allowance.amount,
+                'type': allowance.get_type_display(),
+                'monthly_equivalent': allowance.amount / Decimal('24'),
+                'annual_equivalent': allowance.amount / Decimal('2')
+            }
+        elif allowance.allowance_type.frequency == 'CUSTOM':
+            months = allowance.allowance_type.custom_months or 12
+            custom_allowances[allowance_type] = {
+                'amount': allowance.amount,
+                'type': allowance.get_type_display(),
+                'months': months,
+                'monthly_equivalent': allowance.amount / Decimal(str(months)),
+                'annual_equivalent': (allowance.amount * Decimal('12')) / Decimal(str(months))
             }
         else:  # ONE_TIME
             one_time_costs[allowance_type] = {
@@ -47,48 +68,89 @@ def employee_individual_report(request, employee_id):
                 'type': allowance.get_type_display()
             }
 
-    # حساب الإجماليات
+    # حساب إجماليات البدلات الشهرية (Excel Column H-S)
     total_monthly_allowances = sum(item['amount'] for item in monthly_allowances.values())
+    
+    # حساب معادل شهري للبدلات السنوية وثنائية السنة والمخصصة
+    monthly_from_annual = sum(item['monthly_equivalent'] for item in annual_allowances.values())
+    monthly_from_biennial = sum(item['monthly_equivalent'] for item in biennial_allowances.values())
+    monthly_from_custom = sum(item['monthly_equivalent'] for item in custom_allowances.values())
+    
+    # حساب إجمالي البدلات السنوية (Excel Column Y-AN)
     total_annual_allowances = sum(item['amount'] for item in annual_allowances.values())
-    total_one_time = sum(item['amount'] for item in one_time_costs.values())
-    monthly_equivalent_annual_allowances = total_annual_allowances / Decimal('12') if total_annual_allowances else Decimal('0')
-
-    # حساب التكاليف الإجمالية
+    annual_from_biennial = sum(item['annual_equivalent'] for item in biennial_allowances.values())
+    annual_from_custom = sum(item['annual_equivalent'] for item in custom_allowances.values())
+    
+    # حساب التكاليف الإضافية
+    training_cost_percentage = employee.calculate_training_cost_percentage()
+    family_ticket_data = employee.calculate_family_ticket_cost()
+    eos_data = employee.calculate_end_of_service_benefit()
+    
+    # حساب الراتب الإجمالي الشهري (مطابق لمعادلة Excel =H7+I7+...+S7)
     monthly_gross = (
-        employee.basic_salary +
-        total_monthly_allowances +
-        (total_annual_allowances / Decimal('12'))
+        employee.basic_salary +  # T7
+        total_monthly_allowances +  # H7-S7
+        monthly_from_annual +  # معادل شهري للبدلات السنوية
+        monthly_from_biennial +  # معادل شهري للبدلات ثنائية السنة
+        monthly_from_custom  # معادل شهري للبدلات المخصصة
     )
-
-    annual_gross = monthly_gross * Decimal('12')
+    
+    # حساب التكلفة السنوية الأساسية (مطابق لمعادلة Excel =(T7*12)+AO7)
+    annual_salary_cost = employee.basic_salary * Decimal('12')  # T7*12
+    
+    # حساب إجمالي البدلات السنوية (مطابق لمعادلة Excel =Y7+Z7+...+AN7)
+    total_annual_benefits = (
+        (total_monthly_allowances * Decimal('12')) +  # البدلات الشهرية * 12
+        total_annual_allowances +  # البدلات السنوية
+        annual_from_biennial +  # معادل سنوي للبدلات ثنائية السنة
+        annual_from_custom  # معادل سنوي للبدلات المخصصة
+    )
+    
+    # حساب التكلفة السنوية الإجمالية
     total_annual_cost = (
-        annual_gross +
-        total_one_time +
-        employee.recruitment_cost +
-        employee.training_cost
+        annual_salary_cost +  # (T7*12)
+        total_annual_benefits +  # (Y7+Z7+...+AN7)
+        employee.recruitment_cost +  # تكلفة الاستقدام
+        employee.training_cost +  # تكلفة التدريب الفعلية
+        training_cost_percentage * Decimal('12') +  # تكلفة التدريب كنسبة مئوية سنوية
+        family_ticket_data['annual_cost'] +  # تكلفة التذاكر العائلية
+        sum(item['amount'] for item in one_time_costs.values())  # التكاليف لمرة واحدة
     )
 
-    # حساب المعامل
-    cost_factor = total_annual_cost / (employee.basic_salary * 12) if employee.basic_salary > 0 else 0
+    # حساب المعامل (إجمالي التكلفة السنوية ÷ الراتب الأساسي السنوي)
+    cost_factor = total_annual_cost / annual_salary_cost if annual_salary_cost > 0 else Decimal('0')
 
     report_data = {
         'employee': employee,
         'monthly_allowances': monthly_allowances,
         'annual_allowances': annual_allowances,
-        'monthly_allowances_annual': total_monthly_allowances * Decimal('12'),
+        'biennial_allowances': biennial_allowances,
+        'custom_allowances': custom_allowances,
         'one_time_costs': one_time_costs,
+        'training_cost_percentage': training_cost_percentage,
+        'family_ticket_data': family_ticket_data,
+        'eos_data': eos_data,
         'totals': {
             'basic_salary': employee.basic_salary,
-            'monthly_allowances': total_monthly_allowances,
-            'annual_allowances': total_annual_allowances,
-            'monthly_equivalent_annual_allowances': monthly_equivalent_annual_allowances,
+            'total_monthly_allowances': total_monthly_allowances,
+            'monthly_from_annual': monthly_from_annual,
+            'monthly_from_biennial': monthly_from_biennial,
+            'monthly_from_custom': monthly_from_custom,
             'monthly_gross': monthly_gross,
-            'annual_gross': annual_gross,
-            'one_time_costs': total_one_time,
+            'annual_salary_cost': annual_salary_cost,
+            'total_annual_benefits': total_annual_benefits,
+            'one_time_costs_total': sum(item['amount'] for item in one_time_costs.values()),
             'recruitment_cost': employee.recruitment_cost,
             'training_cost': employee.training_cost,
+            'training_cost_percentage_annual': training_cost_percentage * Decimal('12'),
+            'family_ticket_annual_cost': family_ticket_data['annual_cost'],
             'total_annual_cost': total_annual_cost,
-            'cost_factor': cost_factor
+            'cost_factor': cost_factor,
+            # للتوافق مع القوالب الموجودة
+            'annual_allowances': total_annual_allowances,
+            'monthly_allowances': total_monthly_allowances,
+            'annual_gross': total_annual_cost,
+            'monthly_equivalent_annual_allowances': monthly_from_annual + monthly_from_biennial + monthly_from_custom
         }
     }
 
@@ -187,7 +249,7 @@ def export_individual_report(request, employee_id):
     basic_data = [
         ('الاسم', employee.name),
         ('الجنسية', employee.nationality),
-        ('الفئة', employee.get_category_display()),
+        ('الفئة', employee.category.name),
         ('تاريخ التوظيف', employee.hire_date.strftime('%Y-%m-%d')),
         ('الراتب الأساسي', employee.basic_salary),
     ]
@@ -288,17 +350,33 @@ def comparison_report(request):
         if form.cleaned_data.get('date_to'):
             employees = employees.filter(hire_date__lte=form.cleaned_data['date_to'])
     
-    # حساب بيانات المقارنة
+    # حساب بيانات المقارنة مطابقة لمعادلات Excel
     comparison_data = []
     for employee in employees:
+        # التكلفة السنوية مطابقة لمعادلات Excel
+        annual_cost = employee.get_annual_total_cost()
+        basic_salary_annual = employee.basic_salary * 12
+        
+        # البدلات الشهرية (H-S)
+        monthly_allowances_only = employee.get_total_monthly_allowances()
+        
+        # الراتب الإجمالي الشهري (T + معادل شهري لجميع البدلات)
+        monthly_gross = employee.get_monthly_gross_salary()
+        
+        # نسبة الكفاءة (الراتب الأساسي السنوي ÷ التكلفة الإجمالية)
+        efficiency_ratio = float(basic_salary_annual / annual_cost) if annual_cost > 0 else 0.0
+        
         comparison_data.append({
             'employee': employee,
-            'basic_salary': employee.basic_salary,
-            'monthly_allowances': employee.get_total_monthly_allowances(),
-            'monthly_gross': employee.get_monthly_gross_salary(),
-            'annual_cost': employee.get_annual_total_cost(),
-            'cost_factor': employee.get_cost_factor(),
-            'efficiency_ratio': employee.basic_salary / employee.get_annual_total_cost() if employee.get_annual_total_cost() > 0 else 0
+            'basic_salary': float(employee.basic_salary),
+            'monthly_allowances': float(monthly_allowances_only),
+            'monthly_gross': float(monthly_gross),
+            'annual_cost': float(annual_cost),
+            'cost_factor': float(employee.get_cost_factor()),
+            'efficiency_ratio': efficiency_ratio,
+            'years_of_service': employee.get_years_of_service(),
+            'training_cost_percentage': float(employee.calculate_training_cost_percentage() * 12),
+            'family_ticket_cost': float(employee.calculate_family_ticket_cost()['annual_cost'])
         })
     
     # ترتيب حسب التكلفة السنوية

@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load math_filters %}
+{% load currency_filters %}
 
 {% block title %}تقرير {{ employee.name }} - نظام إدارة الموظفين{% endblock %}
 
@@ -13,7 +15,7 @@
                         <i class="fas fa-user-chart me-2"></i>
                         تقرير مفصل للموظف
                     </h1>
-                    <p class="text-muted">{{ employee.name }} - {{ employee.emp_no }}</p>
+                    <p class="text-muted">{{ employee.name }} - {{ employee.employee_number }}</p>
                 </div>
                 <div>
                     <a href="{% url 'employees:export_individual_report' employee.pk %}" class="btn btn-success">
@@ -47,19 +49,19 @@
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <div class="stats-card text-center">
-                                <div class="stats-number text-primary">{{ report_data.totals.basic_salary|floatformat:2 }}</div>
+                                <div class="stats-number text-primary">{{ report_data.totals.basic_salary|currency }}</div>
                                 <div class="stats-label">الراتب الأساسي (ريال)</div>
                             </div>
                         </div>
                         <div class="col-md-3 mb-3">
                             <div class="stats-card text-center">
-                                <div class="stats-number text-success">{{ report_data.totals.monthly_gross|floatformat:2 }}</div>
+                                <div class="stats-number text-success">{{ report_data.totals.monthly_gross|currency }}</div>
                                 <div class="stats-label">الراتب الإجمالي الشهري (ريال)</div>
                             </div>
                         </div>
                         <div class="col-md-3 mb-3">
                             <div class="stats-card text-center">
-                                <div class="stats-number text-info">{{ report_data.totals.annual_gross|floatformat:2 }}</div>
+                                <div class="stats-number text-info">{{ report_data.totals.annual_gross|currency }}</div>
                                 <div class="stats-label">التكلفة السنوية (ريال)</div>
                             </div>
                         </div>
@@ -134,15 +136,15 @@
                                     <td>
                                         <span class="badge bg-primary">{{ allowance_name }}</span>
                                     </td>
-                                    <td class="text-end">{{ data.amount|floatformat:2 }} ريال</td>
+                                    <td class="text-end">{{ data.amount|currency }} ريال</td>
                                     <td>
                                         <span class="badge {% if data.type == 'نقدي' %}bg-success{% else %}bg-info{% endif %}">
                                             {{ data.type }}
                                         </span>
                                     </td>
-                                    <td class="text-end">{{ data.annual_total|floatformat:2 }} ريال</td>
+                                    <td class="text-end">{{ data.annual_total|currency }} ريال</td>
                                     <td class="text-end">
-                                        {{ report_data.totals.basic_salary}}%
+                                        {{ data.amount|div:report_data.totals.basic_salary|mul:100|floatformat:1 }}%
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -150,11 +152,11 @@
                             <tfoot class="table-secondary">
                                 <tr>
                                     <th>الإجمالي</th>
-                                    <th class="text-end">{{ report_data.totals.monthly_allowances|floatformat:2 }} ريال</th>
+                                    <th class="text-end">{{ report_data.totals.monthly_allowances|currency }} ريال</th>
                                     <th>--</th>
-                                    <th class="text-end">{{ report_data.totals.monthly_allowances_annual|floatformat:2 }} ريال</th>
+                                    <th class="text-end">{{ report_data.totals.monthly_allowances_annual|currency }} ريال</th>
                                     <th class="text-end">
-                                        {{ report_data.totals.basic_salary }}%
+                                        {{ report_data.totals.monthly_allowances|div:report_data.totals.basic_salary|mul:100|floatformat:1 }}%
                                     </th>
                                 </tr>
                             </tfoot>
@@ -195,15 +197,15 @@
                                     <td>
                                         <span class="badge bg-warning">{{ allowance_name }}</span>
                                     </td>
-                                    <td class="text-end">{{ data.amount|floatformat:2 }} ريال</td>
+                                    <td class="text-end">{{ data.amount|currency }} ريال</td>
                                     <td>
                                         <span class="badge {% if data.type == 'نقدي' %}bg-success{% else %}bg-info{% endif %}">
                                             {{ data.type }}
                                         </span>
                                     </td>
-                                    <td class="text-end">{{ data.monthly_equivalent|floatformat:2 }} ريال</td>
+                                    <td class="text-end">{{ data.monthly_equivalent|currency }} ريال</td>
                                     <td class="text-end">
-                                        {{ report_data.totals.annual_allowances}}%
+                                        {{ data.amount|div:report_data.totals.basic_salary|div:12|mul:100|floatformat:1 }}%
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -211,9 +213,9 @@
                             <tfoot class="table-secondary">
                                 <tr>
                                     <th>الإجمالي</th>
-                                    <th class="text-end">{{ report_data.totals.annual_allowances|floatformat:2 }} ريال</th>
+                                    <th class="text-end">{{ report_data.totals.annual_allowances|currency }} ريال</th>
                                     <th>--</th>
-                                    <th class="text-end">{{ report_data.totals.monthly_equivalent_annual_allowances|floatformat:2 }} ريال</th>
+                                    <th class="text-end">{{ report_data.totals.monthly_equivalent_annual_allowances|currency }} ريال</th>
                                     <th class="text-end">
                                         {{ report_data.totals.annual_allowances }}%
                                     </th>
@@ -255,12 +257,12 @@
                                     <td>
                                         <span class="badge bg-danger">{{ cost_name }}</span>
                                     </td>
-                                    <td class="text-end">{{ data.amount|floatformat:2 }} ريال</td>
+                                    <td class="text-end">{{ data.amount|currency }} ريال</td>
                                     <td>
                                         <span class="badge bg-secondary">{{ data.type }}</span>
                                     </td>
                                     <td class="text-end">
-                                        {{ employee.basic_salary  }}%
+                                        {{ data.amount|div:report_data.totals.basic_salary|div:12|mul:100|floatformat:1 }}%
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -289,39 +291,63 @@
                             <tbody>
                                 <tr>
                                     <td><strong>الراتب الأساسي الشهري</strong></td>
-                                    <td class="text-end"><strong>{{ report_data.totals.basic_salary|floatformat:2 }} ريال</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.basic_salary|currency }} ريال</strong></td>
                                 </tr>
                                 <tr>
                                     <td>البدلات الشهرية</td>
-                                    <td class="text-end">{{ report_data.totals.monthly_allowances|floatformat:2 }} ريال</td>
+                                    <td class="text-end">{{ report_data.totals.monthly_allowances|currency }} ريال</td>
                                 </tr>
                                 <tr>
                                     <td>البدلات السنوية (معادل شهري)</td>
-                                    <td class="text-end">{{ report_data.totals.annual_allowances}} ريال</td>
+                                    <td class="text-end">{{ report_data.totals.monthly_equivalent_annual_allowances|currency }} ريال</td>
+                                </tr>
+                                <tr>
+                                    <td>البدلات ثنائية السنة (معادل شهري)</td>
+                                    <td class="text-end">{{ report_data.totals.monthly_from_biennial|currency }} ريال</td>
+                                </tr>
+                                <tr>
+                                    <td>البدلات المخصصة (معادل شهري)</td>
+                                    <td class="text-end">{{ report_data.totals.monthly_from_custom|currency }} ريال</td>
                                 </tr>
                                 <tr class="table-warning">
                                     <td><strong>إجمالي الراتب الشهري</strong></td>
-                                    <td class="text-end"><strong>{{ report_data.totals.monthly_gross|floatformat:2 }} ريال</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.monthly_gross|currency }} ريال</strong></td>
                                 </tr>
                                 <tr>
                                     <td><strong>إجمالي الراتب السنوي</strong></td>
-                                    <td class="text-end"><strong>{{ report_data.totals.annual_gross|floatformat:2 }} ريال</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.annual_gross|currency }} ريال</strong></td>
                                 </tr>
                                 <tr>
                                     <td>تكلفة الاستقدام</td>
-                                    <td class="text-end">{{ report_data.totals.recruitment_cost|floatformat:2 }} ريال</td>
+                                    <td class="text-end">{{ report_data.totals.recruitment_cost|currency }} ريال</td>
                                 </tr>
                                 <tr>
                                     <td>تكلفة التدريب</td>
-                                    <td class="text-end">{{ report_data.totals.training_cost|floatformat:2 }} ريال</td>
+                                    <td class="text-end">{{ report_data.totals.training_cost|currency }} ريال</td>
                                 </tr>
                                 <tr>
                                     <td>التكاليف لمرة واحدة (البدلات)</td>
-                                    <td class="text-end">{{ report_data.totals.one_time_costs|floatformat:2 }} ريال</td>
+                                    <td class="text-end">{{ report_data.totals.one_time_costs|currency }} ريال</td>
                                 </tr>
                                 <tr class="table-success">
                                     <td><strong>إجمالي التكلفة السنوية</strong></td>
-                                    <td class="text-end"><strong>{{ report_data.totals.total_annual_cost|floatformat:2 }} ريال</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.total_annual_cost|currency }} ريال</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>تكلفة التدريب كنسبة مئوية (سنوي)</td>
+                                    <td class="text-end">{{ report_data.totals.training_cost_percentage_annual|currency }} ريال</td>
+                                </tr>
+                                <tr>
+                                    <td>التذاكر العائلية (سنوي)</td>
+                                    <td class="text-end">{{ report_data.totals.family_ticket_annual_cost|currency }} ريال</td>
+                                </tr>
+                                <tr class="table-danger">
+                                    <td><strong>الراتب الأساسي السنوي (T×12)</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.annual_salary_cost|currency }} ريال</strong></td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td><strong>إجمالي البدلات السنوية (Y+Z+...+AN)</strong></td>
+                                    <td class="text-end"><strong>{{ report_data.totals.total_annual_benefits|currency }} ريال</strong></td>
                                 </tr>
                                 <tr class="table-info">
                                     <td><strong>المعامل (التكلفة السنوية ÷ الراتب الأساسي السنوي)</strong></td>
@@ -346,10 +372,10 @@ document.addEventListener('DOMContentLoaded', function() {
         'البدلات الشهرية': {{ report_data.totals.monthly_allowances|floatformat:2 }},
         'البدلات السنوية (معادل شهري)': {{ report_data.totals.annual_allowances }}
     };
-    
+
     const monthlyLabels = Object.keys(monthlyData);
     const monthlyValues = Object.values(monthlyData);
-    
+
     // رسم بياني دائري للتكاليف الشهرية
     const monthlyCtx = document.getElementById('monthlyCostChart').getContext('2d');
     new Chart(monthlyCtx, {
@@ -383,14 +409,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    
+
     // رسم بياني عمودي للمقارنة
     const comparisonData = {
         'الراتب الأساسي': {{ report_data.totals.basic_salary|floatformat:2 }},
         'الراتب الإجمالي': {{ report_data.totals.monthly_gross|floatformat:2 }},
         'التكلفة مع البدلات السنوية': {{ report_data.totals.monthly_gross|floatformat:2 }}
     };
-    
+
     const comparisonCtx = document.getElementById('costComparisonChart').getContext('2d');
     new Chart(comparisonCtx, {
         type: 'bar',

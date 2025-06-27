@@ -8,6 +8,8 @@ from collections import defaultdict, OrderedDict
 import json
 
 from .models import Employee, Allowance, AllowanceType
+from django.db.models import Count, Sum, Avg
+from employees.models import EmployeeCategory
 
 
 class AdvancedReportsGenerator:
@@ -16,26 +18,39 @@ class AdvancedReportsGenerator:
     def __init__(self, queryset=None):
         self.employees = queryset or Employee.objects.filter(is_active=True)
     
+
     def generate_summary_by_category(self):
         """تقرير ملخص حسب الفئة - مطابق لورقة BY CATEGORY"""
         categories = {}
+
+        # نجلب بيانات مجمعة حسب الفئة
         category_totals = self.employees.values('category').annotate(
             total_count=Count('id'),
             total_basic_salary=Sum('basic_salary'),
             avg_salary=Avg('basic_salary')
         ).order_by('category')
-        
+
+        # نجلب أسماء الفئات كلها دفعة واحدة (لتفادي استعلامات متكررة)
+        category_names = {
+            cat.id: cat.name for cat in EmployeeCategory.objects.all()
+        }
+
+        total_employees = self.employees.count()
+
         for idx, cat in enumerate(category_totals, 1):
-            category_name = dict(Employee.CATEGORY_CHOICES).get(cat['category'], cat['category'])
+            cat_id = cat['category']
+            category_name = category_names.get(cat_id, 'غير معروف')
+
             categories[idx] = {
                 'category': category_name,
                 'total_employees': cat['total_count'],
                 'total_basic_salary': float(cat['total_basic_salary'] or 0),
                 'average_salary': float(cat['avg_salary'] or 0),
-                'percentage': round((cat['total_count'] / self.employees.count() * 100), 2) if self.employees.count() > 0 else 0
+                'percentage': round((cat['total_count'] / total_employees * 100), 2) if total_employees > 0 else 0
             }
-        
+
         return categories
+
     
     def generate_summary_by_nationality(self):
         """تقرير ملخص حسب الجنسية - مطابق لتجميع البيانات بالجنسية"""
@@ -69,15 +84,21 @@ class AdvancedReportsGenerator:
             annual_cost = employee.get_annual_total_cost()
             
             # حساب سنوات الخدمة
-            years_of_service = self._calculate_years_of_service(employee.hire_date)
+            years_of_service = employee.get_years_of_service()
             
-            # حساب الزيادات (افتراضي - يمكن تخصيصه)
-            salary_increases = self._calculate_salary_increases(employee)
+            # حساب نهاية الخدمة
+            eos_data = employee.calculate_end_of_service_benefit()
+            
+            # حساب تكلفة التدريب
+            training_cost_percentage = employee.calculate_training_cost_percentage()
+            
+            # حساب تكلفة التذاكر العائلية
+            family_ticket_data = employee.calculate_family_ticket_cost()
             
             detailed_report.append({
                 'employee_number': employee.employee_number,
                 'name': employee.name,
-                'category': employee.get_category_display(),
+                'category': employee.category.name,
                 'nationality': employee.nationality,
                 'hire_date': employee.hire_date.strftime('%d/%m/%Y'),
                 'basic_salary': float(employee.basic_salary),
@@ -85,12 +106,14 @@ class AdvancedReportsGenerator:
                 'monthly_gross': float(monthly_gross),
                 'annual_cost': float(annual_cost),
                 'years_of_service': years_of_service,
-                'salary_increases': salary_increases,
                 'insurance_type': employee.get_insurance_type_display(),
                 'cost_factor': float(employee.get_cost_factor()),
                 'efficiency_ratio': self._calculate_efficiency_ratio(employee),
-                'project_assignment': 'مشروع افتراضي',  # يمكن إضافة حقل مشروع لاحقاً
-                'location': 'المكتب الرئيسي',  # يمكن إضافة حقل الموقع لاحقاً
+                'eos_total': float(eos_data['total_amount']),
+                'training_cost_percentage': float(training_cost_percentage),
+                'family_ticket_cost': float(family_ticket_data['annual_cost']),
+                'ticket_type': family_ticket_data['ticket_type'],
+                'family_members': family_ticket_data['family_members'],
             })
         
         return detailed_report
@@ -121,17 +144,24 @@ class AdvancedReportsGenerator:
             'training_costs': float(sum(emp.training_cost for emp in self.employees)),
         }
         
-        # تحليل حسب الفئات
+        # تحليل حسب الفئات باستخدام جدول EmployeeCategory
         category_analysis = {}
-        for category_code, category_name in Employee.CATEGORY_CHOICES:
-            cat_employees = self.employees.filter(category=category_code)
+
+        categories = EmployeeCategory.objects.all()
+        for category in categories:
+            cat_employees = self.employees.filter(category=category)
             if cat_employees.exists():
-                category_analysis[category_name] = {
-                    'count': cat_employees.count(),
-                    'total_cost': float(sum(emp.get_annual_total_cost() for emp in cat_employees)),
-                    'average_cost': float(sum(emp.get_annual_total_cost() for emp in cat_employees) / cat_employees.count()),
-                    'percentage_of_total': round((cat_employees.count() / total_employees * 100), 2)
+                count = cat_employees.count()
+                total_cost = sum(emp.get_annual_total_cost() for emp in cat_employees)
+                average_cost = total_cost / count if count else 0
+
+                category_analysis[category.name] = {
+                    'count': count,
+                    'total_cost': float(total_cost),
+                    'average_cost': float(average_cost),
+                    'percentage_of_total': round((count / total_employees * 100), 2) if total_employees > 0 else 0
                 }
+
         
         return {
             'summary': {

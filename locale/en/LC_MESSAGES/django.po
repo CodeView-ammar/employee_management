@@ -1,0 +1,469 @@
+
+# English Translation for Employee Management System
+msgid ""
+msgstr ""
+"Project-Id-Version: Employee Management\n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: System Admin\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Navigation
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Employees"
+msgstr "Employees"
+
+msgid "Add Employee"
+msgstr "Add Employee"
+
+msgid "Employee List"
+msgstr "Employee List"
+
+msgid "Reports"
+msgstr "Reports"
+
+msgid "General Reports"
+msgstr "General Reports"
+
+msgid "Comparison Report"
+msgstr "Comparison Report"
+
+msgid "Advanced Reports"
+msgstr "Advanced Reports"
+
+msgid "Settings"
+msgstr "Settings"
+
+msgid "Import Excel"
+msgstr "Import Excel"
+
+msgid "Admin Panel"
+msgstr "Admin Panel"
+
+msgid "Logout"
+msgstr "Logout"
+
+# Employee Fields
+msgid "Employee Number"
+msgstr "Employee Number"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Nationality"
+msgstr "Nationality"
+
+msgid "Category"
+msgstr "Category"
+
+msgid "Hire Date"
+msgstr "Hire Date"
+
+msgid "Basic Salary"
+msgstr "Basic Salary"
+
+msgid "Monthly Allowances"
+msgstr "Monthly Allowances"
+
+msgid "Annual Cost"
+msgstr "Annual Cost"
+
+msgid "Cost Factor"
+msgstr "Cost Factor"
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Inactive"
+msgstr "Inactive"
+
+# Buttons and Actions
+msgid "Add"
+msgstr "Add"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "View"
+msgstr "View"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Export"
+msgstr "Export"
+
+msgid "Print"
+msgstr "Print"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Reset"
+msgstr "Reset"
+
+# Reports
+msgid "Total Employees"
+msgstr "Total Employees"
+
+msgid "Monthly Cost"
+msgstr "Monthly Cost"
+
+msgid "Average Salary"
+msgstr "Average Salary"
+
+msgid "Training Cost"
+msgstr "Training Cost"
+
+msgid "Family Tickets"
+msgstr "Family Tickets"
+
+msgid "End of Service"
+msgstr "End of Service"
+
+msgid "Allowances"
+msgstr "Allowances"
+
+msgid "Recruitment Cost"
+msgstr "Recruitment Cost"
+
+# Filters
+msgid "From Date"
+msgstr "From Date"
+
+msgid "To Date"
+msgstr "To Date"
+
+msgid "Minimum Salary"
+msgstr "Minimum Salary"
+
+msgid "Maximum Salary"
+msgstr "Maximum Salary"
+
+# Status Messages
+msgid "Employee added successfully"
+msgstr "Employee added successfully"
+
+msgid "Employee updated successfully"
+msgstr "Employee updated successfully"
+
+msgid "Employee deleted successfully"
+msgstr "Employee deleted successfully"
+
+msgid "No employees found"
+msgstr "No employees found"
+
+msgid "Error occurred"
+msgstr "Error occurred"
+
+# Categories
+msgid "Manager"
+msgstr "Manager"
+
+msgid "Employee"
+msgstr "Employee"
+
+msgid "Supervisor"
+msgstr "Supervisor"
+
+msgid "Assistant"
+msgstr "Assistant"
+
+# Common
+msgid "Yes"
+msgstr "Yes"
+
+msgid "No"
+msgstr "No"
+
+msgid "None"
+msgstr "None"
+
+msgid "All"
+msgstr "All"
+
+msgid "Select"
+msgstr "Select"
+
+msgid "Choose"
+msgstr "Choose"
+
+msgid "Optional"
+msgstr "Optional"
+
+msgid "Required"
+msgstr "Required"
+# English Translation for Employee Management System
+msgid ""
+msgstr ""
+"Project-Id-Version: Employee Management\n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: System Admin\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Navigation
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Employees"
+msgstr "Employees"
+
+msgid "Add Employee"
+msgstr "Add Employee"
+
+msgid "Employee List"
+msgstr "Employee List"
+
+msgid "Reports"
+msgstr "Reports"
+
+msgid "General Reports"
+msgstr "General Reports"
+
+msgid "Comparison Report"
+msgstr "Comparison Report"
+
+msgid "Advanced Reports"
+msgstr "Advanced Reports"
+
+msgid "Settings"
+msgstr "Settings"
+
+msgid "Import Excel"
+msgstr "Import Excel"
+
+msgid "Admin Panel"
+msgstr "Admin Panel"
+
+msgid "Logout"
+msgstr "Logout"
+
+# Employee Fields
+msgid "Employee Number"
+msgstr "Employee Number"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Nationality"
+msgstr "Nationality"
+
+msgid "Category"
+msgstr "Category"
+
+msgid "Hire Date"
+msgstr "Hire Date"
+
+msgid "Basic Salary"
+msgstr "Basic Salary"
+
+msgid "Monthly Allowances"
+msgstr "Monthly Allowances"
+
+msgid "Annual Cost"
+msgstr "Annual Cost"
+
+msgid "Cost Factor"
+msgstr "Cost Factor"
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Inactive"
+msgstr "Inactive"
+
+# Buttons and Actions
+msgid "Add"
+msgstr "Add"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "View"
+msgstr "View"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Export"
+msgstr "Export"
+
+msgid "Print"
+msgstr "Print"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Reset"
+msgstr "Reset"
+
+# Reports
+msgid "Total Employees"
+msgstr "Total Employees"
+
+msgid "Monthly Cost"
+msgstr "Monthly Cost"
+
+msgid "Average Salary"
+msgstr "Average Salary"
+
+msgid "Training Cost"
+msgstr "Training Cost"
+
+msgid "Family Tickets"
+msgstr "Family Tickets"
+
+msgid "End of Service"
+msgstr "End of Service"
+
+msgid "Allowances"
+msgstr "Allowances"
+
+msgid "Recruitment Cost"
+msgstr "Recruitment Cost"
+
+# Filters
+msgid "From Date"
+msgstr "From Date"
+
+msgid "To Date"
+msgstr "To Date"
+
+msgid "Minimum Salary"
+msgstr "Minimum Salary"
+
+msgid "Maximum Salary"
+msgstr "Maximum Salary"
+
+# Status Messages
+msgid "Employee added successfully"
+msgstr "Employee added successfully"
+
+msgid "Employee updated successfully"
+msgstr "Employee updated successfully"
+
+msgid "Employee deleted successfully"
+msgstr "Employee deleted successfully"
+
+msgid "No employees found"
+msgstr "No employees found"
+
+msgid "Error occurred"
+msgstr "Error occurred"
+
+# Categories
+msgid "Manager"
+msgstr "Manager"
+
+msgid "Employee"
+msgstr "Employee"
+
+msgid "Supervisor"
+msgstr "Supervisor"
+
+msgid "Assistant"
+msgstr "Assistant"
+
+# Common
+msgid "Yes"
+msgstr "Yes"
+
+msgid "No"
+msgstr "No"
+
+msgid "None"
+msgstr "None"
+
+msgid "All"
+msgstr "All"
+
+msgid "Select"
+msgstr "Select"
+
+msgid "Choose"
+msgstr "Choose"
+
+msgid "Optional"
+msgstr "Optional"
+
+msgid "Required"
+msgstr "Required"
+
+msgid "Employee Management System"
+msgstr "Employee Management System"
+
+msgid "Employee Comparison Report"
+msgstr "Employee Comparison Report"
+
+msgid "Compare costs and efficiency between employees"
+msgstr "Compare costs and efficiency between employees"
+
+msgid "Back to Reports"
+msgstr "Back to Reports"
+
+msgid "Filter Comparison"
+msgstr "Filter Comparison"
+
+msgid "Search Employee"
+msgstr "Search Employee"
+
+msgid "Highest Cost"
+msgstr "Highest Cost"
+
+msgid "Lowest Cost"
+msgstr "Lowest Cost"
+
+msgid "Average Cost"
+msgstr "Average Cost"
+
+msgid "SAR"
+msgstr "SAR"
+
+msgid "Monthly Gross"
+msgstr "Monthly Gross"
+
+msgid "Efficiency"
+msgstr "Efficiency"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Detailed Comparison"
+msgstr "Detailed Comparison"
+
+msgid "Detailed Report"
+msgstr "Detailed Report"
+
+msgid "View Details"
+msgstr "View Details"
+
+msgid "Try adjusting your search criteria"
+msgstr "Try adjusting your search criteria"

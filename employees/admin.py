@@ -55,8 +55,8 @@ class AllowanceTypeAdmin(admin.ModelAdmin):
     search_fields = ['name', 'name_arabic']
 
 
-@admin.register(Allowance)
-class AllowanceAdmin(admin.ModelAdmin):
-    list_display = ['employee', 'allowance_type', 'amount', 'type', 'is_active']
-    list_filter = ['allowance_type', 'type', 'is_active']
-    search_fields = ['employee__name', 'employee__employee_number', 'allowance_type__name_arabic']
+# @admin.register(Allowance)
+# class AllowanceAdmin(admin.ModelAdmin):
+#     list_display = ['employee', 'allowance_type', 'amount', 'type', 'is_active']
+#     list_filter = ['allowance_type', 'type', 'is_active']
+#     search_fields = ['employee__name', 'employee__employee_number', 'allowance_type__name_arabic']

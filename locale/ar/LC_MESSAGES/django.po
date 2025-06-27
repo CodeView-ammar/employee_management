@@ -1,0 +1,210 @@
+
+# Arabic Translation for Employee Management System
+msgid ""
+msgstr ""
+"Project-Id-Version: Employee Management\n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: System Admin\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+
+# Navigation
+msgid "Dashboard"
+msgstr "لوحة التحكم"
+
+msgid "Employees"
+msgstr "الموظفون"
+
+msgid "Add Employee"
+msgstr "إضافة موظف"
+
+msgid "Employee List"
+msgstr "قائمة الموظفين"
+
+msgid "Reports"
+msgstr "التقارير"
+
+msgid "General Reports"
+msgstr "التقارير العامة"
+
+msgid "Comparison Report"
+msgstr "تقرير المقارنة"
+
+msgid "Advanced Reports"
+msgstr "التقارير المتقدمة"
+
+msgid "Settings"
+msgstr "الإعدادات"
+
+msgid "Import Excel"
+msgstr "استيراد Excel"
+
+msgid "Admin Panel"
+msgstr "لوحة الإدارة"
+
+msgid "Logout"
+msgstr "تسجيل الخروج"
+
+# Employee Fields
+msgid "Employee Number"
+msgstr "رقم الموظف"
+
+msgid "Name"
+msgstr "الاسم"
+
+msgid "Nationality"
+msgstr "الجنسية"
+
+msgid "Category"
+msgstr "الفئة"
+
+msgid "Hire Date"
+msgstr "تاريخ التوظيف"
+
+msgid "Basic Salary"
+msgstr "الراتب الأساسي"
+
+msgid "Monthly Allowances"
+msgstr "البدلات الشهرية"
+
+msgid "Annual Cost"
+msgstr "التكلفة السنوية"
+
+msgid "Cost Factor"
+msgstr "معامل التكلفة"
+
+msgid "Active"
+msgstr "نشط"
+
+msgid "Inactive"
+msgstr "غير نشط"
+
+# Buttons and Actions
+msgid "Add"
+msgstr "إضافة"
+
+msgid "Edit"
+msgstr "تعديل"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "View"
+msgstr "عرض"
+
+msgid "Save"
+msgstr "حفظ"
+
+msgid "Cancel"
+msgstr "إلغاء"
+
+msgid "Export"
+msgstr "تصدير"
+
+msgid "Print"
+msgstr "طباعة"
+
+msgid "Search"
+msgstr "بحث"
+
+msgid "Filter"
+msgstr "تصفية"
+
+msgid "Reset"
+msgstr "إعادة تعيين"
+
+# Reports
+msgid "Total Employees"
+msgstr "إجمالي الموظفين"
+
+msgid "Monthly Cost"
+msgstr "التكلفة الشهرية"
+
+msgid "Average Salary"
+msgstr "متوسط الراتب"
+
+msgid "Training Cost"
+msgstr "تكلفة التدريب"
+
+msgid "Family Tickets"
+msgstr "تذاكر العائلة"
+
+msgid "End of Service"
+msgstr "نهاية الخدمة"
+
+msgid "Allowances"
+msgstr "البدلات"
+
+msgid "Recruitment Cost"
+msgstr "تكلفة التوظيف"
+
+# Filters
+msgid "From Date"
+msgstr "من تاريخ"
+
+msgid "To Date"
+msgstr "إلى تاريخ"
+
+msgid "Minimum Salary"
+msgstr "الحد الأدنى للراتب"
+
+msgid "Maximum Salary"
+msgstr "الحد الأقصى للراتب"
+
+# Status Messages
+msgid "Employee added successfully"
+msgstr "تم إضافة الموظف بنجاح"
+
+msgid "Employee updated successfully"
+msgstr "تم تحديث الموظف بنجاح"
+
+msgid "Employee deleted successfully"
+msgstr "تم حذف الموظف بنجاح"
+
+msgid "No employees found"
+msgstr "لم يتم العثور على موظفين"
+
+msgid "Error occurred"
+msgstr "حدث خطأ"
+
+# Categories
+msgid "Manager"
+msgstr "مدير"
+
+msgid "Employee"
+msgstr "موظف"
+
+msgid "Supervisor"
+msgstr "مشرف"
+
+msgid "Assistant"
+msgstr "مساعد"
+
+# Common
+msgid "Yes"
+msgstr "نعم"
+
+msgid "No"
+msgstr "لا"
+
+msgid "None"
+msgstr "لا يوجد"
+
+msgid "All"
+msgstr "الكل"
+
+msgid "Select"
+msgstr "اختر"
+
+msgid "Choose"
+msgstr "اختر"
+
+msgid "Optional"
+msgstr "اختياري"
+
+msgid "Required"
+msgstr "مطلوب"

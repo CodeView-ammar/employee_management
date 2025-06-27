@@ -14,7 +14,7 @@ from io import BytesIO
 import xlsxwriter
 from datetime import datetime
 
-from .models import Employee, Allowance, AllowanceType,EmployeeCategory
+from .models import Employee, Allowance, AllowanceType, EmployeeCategory
 from .forms import EmployeeForm, AllowanceFormSet, ReportFilterForm, ExcelImportForm
 from .utils import import_employees_from_excel, export_template_excel
 
@@ -263,19 +263,20 @@ def generate_report_data(employees):
     total_monthly_cost = sum(emp.get_monthly_gross_salary() for emp in employees)
     total_annual_cost = sum(emp.get_annual_total_cost() for emp in employees)
     avg_cost_factor = sum(emp.get_cost_factor() for emp in employees) / total_employees if total_employees > 0 else 0
-    
-    # تجميع حسب الفئة
+
+    # ✅ تجميع حسب الفئة (باستخدام جدول EmployeeCategory)
     by_category = {}
-    for category_code, category_name in Employee.CATEGORY_CHOICES:
-        cat_employees = employees.filter(category=category_code)
+    categories = EmployeeCategory.objects.all()
+    for category in categories:
+        cat_employees = employees.filter(category=category)
         if cat_employees.exists():
-            by_category[category_name] = {
+            by_category[category.name] = {
                 'count': cat_employees.count(),
                 'total_monthly': sum(emp.get_monthly_gross_salary() for emp in cat_employees),
                 'total_annual': sum(emp.get_annual_total_cost() for emp in cat_employees)
             }
-    
-    # تجميع حسب الجنسية
+
+    # ✅ تجميع حسب الجنسية
     by_nationality = {}
     nationalities = employees.values_list('nationality', flat=True).distinct()
     for nationality in nationalities:
@@ -285,7 +286,7 @@ def generate_report_data(employees):
             'total_monthly': sum(emp.get_monthly_gross_salary() for emp in nat_employees),
             'total_annual': sum(emp.get_annual_total_cost() for emp in nat_employees)
         }
-    
+
     return {
         'summary': {
             'total_employees': total_employees,
@@ -297,7 +298,6 @@ def generate_report_data(employees):
         'by_nationality': by_nationality,
         'employees': employees
     }
-
 
 @login_required
 def export_excel(request):
@@ -363,7 +363,7 @@ def export_excel(request):
         worksheet.write(row, 0, employee.employee_number, data_format)
         worksheet.write(row, 1, employee.name, data_format)
         worksheet.write(row, 2, employee.nationality, data_format)
-        worksheet.write(row, 3, employee.get_category_display(), data_format)
+        worksheet.write(row, 3, employee.category.name, data_format)
         worksheet.write(row, 4, employee.hire_date.strftime('%Y-%m-%d'), data_format)
         worksheet.write(row, 5, float(employee.basic_salary), number_format)
         worksheet.write(row, 6, float(employee.get_total_monthly_allowances()), number_format)

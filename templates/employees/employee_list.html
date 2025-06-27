@@ -198,7 +198,7 @@
                                                 <span class="badge bg-info">{{ employee.nationality }}</span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary">{{ employee.get_category_display }}</span>
+                                                <span class="badge bg-primary">{{ employee.category.name }}</span>
                                             </td>
                                             <td>{{ employee.hire_date|date:"Y-m-d" }}</td>
                                             <td class="text-end">{{ employee.basic_salary|floatformat:2 }} ريال</td>
