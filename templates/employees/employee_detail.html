@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}{{ employee.name }} - تفاصيل الموظف{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 text-primary">
+                        <i class="fas fa-user me-2"></i>
+                        تفاصيل الموظف
+                    </h1>
+                    <p class="text-muted">{{ employee.name }} - {{ employee.employee_number }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'employees:employee_individual_report' employee.pk %}" class="btn btn-success">
+                        <i class="fas fa-chart-line me-2"></i>
+                        التقرير المفصل
+                    </a>
+                    <!-- <a href="{% url 'employees:employee_edit' employee.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>
+                        تعديل البيانات
+                    </a> -->
+                    <a href="{% url 'employees:employee_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        العودة للقائمة
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Information -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        البيانات الأساسية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>رقم الموظف:</strong>
+                            <p class="mb-1">{{ employee.employee_number }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>الاسم:</strong>
+                            <p class="mb-1">{{ employee.name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>الجنسية:</strong>
+                            <p class="mb-1">
+                                <span class="badge bg-info">{{ employee.nationality }}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>الفئة:</strong>
+                            <p class="mb-1">
+                                <span class="badge bg-primary">{{ employee.category.name }}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>تاريخ التوظيف:</strong>
+                            <p class="mb-1">{{ employee.hire_date|date:"Y-m-d" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>رقم الهوية/الإقامة:</strong>
+                            <p class="mb-1">{{ employee.id_number|default:"غير محدد" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>نوع التأمين الطبي:</strong>
+                            <p class="mb-1">
+                                <span class="badge bg-success">{{ employee.get_insurance_type_display }}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>الحالة:</strong>
+                            <p class="mb-1">
+                                {% if employee.is_active %}
+                                    <span class="badge bg-success">نشط</span>
+                                {% else %}
+                                    <span class="badge bg-danger">غير نشط</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            {% if employee.photo %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">صورة الموظف</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ employee.photo.url }}" alt="{{ employee.name }}" 
+                             class="img-fluid rounded" style="max-height: 200px;">
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-family me-2"></i>
+                        بيانات العائلة
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 text-center">
+                            <div class="stats-number text-primary">{{ employee.num_wives }}</div>
+                            <div class="stats-label">عدد الزوجات</div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div class="stats-number text-info">{{ employee.num_children }}</div>
+                            <div class="stats-label">عدد الأبناء</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Summary -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calculator me-2"></i>
+                        الملخص المالي
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-primary">{{ employee.basic_salary|floatformat:2 }}</div>
+                                <div class="stats-label">الراتب الأساسي (ريال)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-success">{{ monthly_allowances|floatformat:2 }}</div>
+                                <div class="stats-label">البدلات الشهرية (ريال)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-info">{{ monthly_gross|floatformat:2 }}</div>
+                                <div class="stats-label">الراتب الإجمالي الشهري (ريال)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-warning">{{ annual_cost|floatformat:2 }}</div>
+                                <div class="stats-label">التكلفة السنوية (ريال)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-danger">{{ employee.recruitment_cost|floatformat:2 }}</div>
+                                <div class="stats-label">تكلفة الاستقدام (ريال)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-dark">{{ employee.training_cost|floatformat:2 }}</div>
+                                <div class="stats-label">تكلفة التدريب (ريال)</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-number text-secondary">{{ cost_factor|floatformat:2 }}</div>
+                                <div class="stats-label">المعامل</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Allowances -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-money-check-alt me-2"></i>
+                        البدلات والمزايا
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if allowances %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>نوع البدل</th>
+                                        <th>المبلغ</th>
+                                        <th>طبيعة البدل</th>
+                                        <th>التكرار</th>
+                                        <th>المبلغ الشهري</th>
+                                        <th>المبلغ السنوي</th>
+                                        <th>ملاحظات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for allowance in allowances %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary">{{ allowance.allowance_type.name_arabic }}</span>
+                                            </td>
+                                            <td class="text-end">{{ allowance.amount|floatformat:2 }} ريال</td>
+                                            <td>
+                                                {% if allowance.type == 'CASH' %}
+                                                    <span class="badge bg-success">نقدي</span>
+                                                {% else %}
+                                                    <span class="badge bg-info">عيني</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ allowance.allowance_type.get_frequency_display }}</span>
+                                            </td>
+                                            <td class="text-end">{{ allowance.get_monthly_amount|floatformat:2 }} ريال</td>
+                                            <td class="text-end">{{ allowance.get_annual_amount|floatformat:2 }} ريال</td>
+                                            <td>{{ allowance.notes|default:"--" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="table-secondary">
+                                    <tr>
+                                        <th colspan="4">الإجمالي</th>
+                                        <th class="text-end">{{ monthly_allowances|floatformat:2 }} ريال</th>
+                                        <th class="text-end">{{ employee.get_annual_allowances|floatformat:2 }} ريال</th>
+                                        <th>--</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-money-check-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">لا توجد بدلات مسجلة</h5>
+                            <p class="text-muted">يمكنك إضافة البدلات من خلال تعديل بيانات الموظف</p>
+                            <a href="{% url 'employees:employee_edit' employee.pk %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>
+                                إضافة بدلات
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

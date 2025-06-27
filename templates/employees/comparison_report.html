@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% load math_filters %}
+{% load currency_filters %}
+{% load i18n %}
+
+{% block title %}{% trans "Comparison Report" %} - {% trans "Employee Management System" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 text-primary">
+                        <i class="fas fa-balance-scale me-2"></i>
+                        {% trans "Employee Comparison Report" %}
+                    </h1>
+                    <p class="text-muted">{% trans "Compare costs and efficiency between employees" %}</p>
+                </div>
+                <div>
+                    <a href="{% url 'employees:reports' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        {% trans "Back to Reports" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-filter me-2"></i>
+                        {% trans "Filter Comparison" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">{% trans "Search Employee" %}</label>
+                            {{ form.employee_search }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">{% trans "Nationality" %}</label>
+                            {{ form.nationality }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">{% trans "Category" %}</label>
+                            {{ form.category }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">{% trans "From Date" %}</label>
+                            {{ form.date_from }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">{% trans "To Date" %}</label>
+                            {{ form.date_to }}
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    {% if comparison_data %}
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{% trans "Total Employees" %}</h4>
+                            <h2 class="mb-0">{{ comparison_data|length }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{% trans "Highest Cost" %}</h4>
+                            {% with comparison_data|first as highest %}
+                            <h2 class="mb-0">{{ highest.annual_cost|floatformat:0 }}</h2>
+                            <small>{% trans "SAR" %}</small>
+                            {% endwith %}
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-arrow-up fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{% trans "Lowest Cost" %}</h4>
+                            {% with comparison_data|last as lowest %}
+                            <h2 class="mb-0">{{ lowest.annual_cost|floatformat:0 }}</h2>
+                            <small>{% trans "SAR" %}</small>
+                            {% endwith %}
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-arrow-down fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{% trans "Average Cost" %}</h4>
+                            {% with total_cost=0 count=comparison_data|length %}
+                                {% for data in comparison_data %}
+                                    {% with total_cost=total_cost|add_filter:data.annual_cost %}{% endwith %}
+                                {% endfor %}
+                                <h2 class="mb-0">{{ total_cost|div:count|floatformat:0 }}</h2>
+                                <small>{% trans "SAR" %}</small>
+                            {% endwith %}
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calculator fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Comparison Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-table me-2"></i>
+                        {% trans "Detailed Comparison" %}
+                    </h5>
+                    <div>
+                        <button class="btn btn-success btn-sm" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>
+                            {% trans "Print" %}
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered" id="comparisonTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>{% trans "Employee Number" %}</th>
+                                    <th>{% trans "Name" %}</th>
+                                    <th>{% trans "Category" %}</th>
+                                    <th>{% trans "Nationality" %}</th>
+                                    <th class="text-end">{% trans "Basic Salary" %}</th>
+                                    <th class="text-end">{% trans "Monthly Allowances" %}</th>
+                                    <th class="text-end">{% trans "Monthly Gross" %}</th>
+                                    <th class="text-end">{% trans "Annual Cost" %}</th>
+                                    <th class="text-end">{% trans "Cost Factor" %}</th>
+                                    <th class="text-end">{% trans "Efficiency" %}</th>
+                                    <th class="text-center">{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in comparison_data %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ data.employee.employee_number }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="ms-2">
+                                                <strong>{{ data.employee.name }}</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            {{ data.employee.category.name }}
+                                        </span>
+                                    </td>
+                                    <td>{{ data.employee.nationality }}</td>
+                                    <td class="text-end">
+                                        <strong>{{ data.basic_salary|floatformat:0 }}</strong>
+                                    </td>
+                                    <td class="text-end">{{ data.monthly_allowances|floatformat:0 }}</td>
+                                    <td class="text-end">{{ data.monthly_gross|floatformat:0 }}</td>
+                                    <td class="text-end">
+                                        <strong class="text-primary">{{ data.annual_cost|floatformat:0 }}</strong>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="badge {% if data.cost_factor > 2 %}bg-danger{% elif data.cost_factor > 1.5 %}bg-warning{% else %}bg-success{% endif %}">
+                                            {{ data.cost_factor|floatformat:2 }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar {% if data.efficiency_ratio > 0.7 %}bg-success{% elif data.efficiency_ratio > 0.5 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                 style="width: {{ data.efficiency_ratio|mul:100 }}%">
+                                                <small class="text-white">
+                                                    {{ data.efficiency_ratio|floatformat:2 }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'employees:employee_individual_report' data.employee.pk %}" 
+                                           class="btn btn-sm btn-outline-success" 
+                                           data-bs-toggle="tooltip" title="{% trans 'Detailed Report' %}">
+                                            <i class="fas fa-chart-line"></i>
+                                        </a>
+                                        <a href="{% url 'employees:employee_detail' data.employee.pk %}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           data-bs-toggle="tooltip" title="{% trans 'View Details' %}">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-5x text-muted mb-3"></i>
+                <h3 class="text-muted">{% trans "No employees found" %}</h3>
+                <p class="text-muted">{% trans "Try adjusting your search criteria" %}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

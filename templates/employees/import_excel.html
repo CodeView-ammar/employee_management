@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 text-primary">
+                        <i class="fas fa-file-excel me-2"></i>
+                        {{ title }}
+                    </h1>
+                    <p class="text-muted">استيراد بيانات الموظفين من ملف Excel</p>
+                </div>
+                <div>
+                    <a href="{% url 'employees:employee_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        العودة للقائمة
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Import Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-upload me-2"></i>
+                        رفع ملف Excel
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% crispy form %}
+                    </form>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        تعليمات الاستيراد
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb me-2"></i>نصائح مهمة:</h6>
+                        <ul class="mb-0">
+                            <li>تأكد من أن ملف Excel يحتوي على العناوين المطلوبة في الصف الأول</li>
+                            <li>استخدم التنسيق الصحيح للتواريخ (YYYY-MM-DD أو DD/MM/YYYY)</li>
+                            <li>تأكد من أن الأرقام لا تحتوي على رموز أو حروف غير مرغوب فيها</li>
+                            <li>سيتم تحديث بيانات الموظفين الموجودين بناءً على رقم الموظف</li>
+                        </ul>
+                    </div>
+                    
+                    <h6 class="mt-3">الحقول المطلوبة:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><strong>رقم الموظف</strong> (مطلوب)</li>
+                                <li class="list-group-item"><strong>الاسم</strong> (مطلوب)</li>
+                                <li class="list-group-item"><strong>الجنسية</strong> (مطلوب)</li>
+                                <li class="list-group-item"><strong>الراتب الأساسي</strong> (مطلوب)</li>
+                                <li class="list-group-item">تاريخ التوظيف</li>
+                                <li class="list-group-item">رقم الهوية</li>
+                                <li class="list-group-item">الفئة</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">نوع التأمين</li>
+                                <li class="list-group-item">عدد الزوجات</li>
+                                <li class="list-group-item">عدد الأبناء</li>
+                                <li class="list-group-item">تكلفة الاستقدام</li>
+                                <li class="list-group-item">تكلفة التدريب</li>
+                                <li class="list-group-item"><strong>أعمدة البدلات:</strong> أي عمود يحتوي على "بدل"</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success mt-3">
+                        <h6><i class="fas fa-gift me-2"></i>ميزة جديدة - استيراد البدلات:</h6>
+                        <ul class="mb-0">
+                            <li>يمكن إضافة أعمدة البدلات في نفس ملف Excel</li>
+                            <li>سيتم إنشاء أنواع البدلات تلقائياً حسب أسماء الأعمدة</li>
+                            <li>البدلات ستُربط بالموظفين المستوردين مباشرة</li>
+                            <li>يدعم البدلات الشهرية والسنوية حسب الاسم</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Sample Template -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-download me-2"></i>
+                        قالب Excel
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-file-excel fa-5x text-success mb-3"></i>
+                    <h6>تحميل قالب Excel</h6>
+                    <p class="text-muted">احصل على قالب Excel جاهز يحتوي على جميع الحقول المطلوبة</p>
+                    <a href="{% url 'employees:export_template' %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-download me-2"></i>
+                        تحميل القالب مع البدلات
+                    </a>
+                </div>
+            </div>
+
+            <!-- Supported Formats -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-file-alt me-2"></i>
+                        التنسيقات المدعومة
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-file-excel text-success me-2"></i>
+                            Excel (.xlsx)
+                        </div>
+                        <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-file-excel text-success me-2"></i>
+                            Excel Legacy (.xls)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Size Limit -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <div class="alert alert-warning mb-0">
+                        <small>
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            الحد الأقصى لحجم الملف: 10 ميجابايت
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function downloadTemplate() {
+    // إنشاء رابط تحميل قالب Excel
+    const link = document.createElement('a');
+    link.href = '/static/templates/employee_template.xlsx';
+    link.download = 'قالب_الموظفين.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// إظهار معلومات الملف المختار
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                const fileName = file.name;
+                
+                // إظهار معلومات الملف
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'alert alert-info mt-2';
+                fileInfo.innerHTML = `
+                    <i class="fas fa-file me-2"></i>
+                    <strong>الملف المختار:</strong> ${fileName} (${fileSize} ميجابايت)
+                `;
+                
+                // إزالة المعلومات السابقة إن وجدت
+                const existingInfo = document.querySelector('.file-info');
+                if (existingInfo) {
+                    existingInfo.remove();
+                }
+                
+                fileInfo.classList.add('file-info');
+                fileInput.parentNode.appendChild(fileInfo);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
