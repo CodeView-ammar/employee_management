@@ -1,7 +1,6 @@
-{% load i18n %}
-{% load static %}
-<!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+{% load i18n static %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" dir="{{ LANGUAGE_BIDI|yesno:'rtl,ltr,auto' }}">
 
 <head>
     <meta charset="UTF-8">
@@ -14,6 +13,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}">{% endif %}
+    {% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% static "admin/css/responsive_rtl.css" %}">{% endif %}
+
+
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -69,32 +73,32 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-globe me-1"></i> {% if LANGUAGE_CODE == 'ar' %}العربية{% else %}English{% endif %}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <form action="{% url 'set_language' %}" method="post" class="dropdown-item-form">
-                                    {% csrf_token %}
-                                    <input name="next" type="hidden" value="{{ request.get_full_path }}" />
-                                    <button type="submit" name="language" value="ar" class="dropdown-item {% if LANGUAGE_CODE == 'ar' %}active{% endif %}">
-                                        العربية
-                                    </button>
-                                </form>
-                            </li>
-                            <li>
-                                <form action="{% url 'set_language' %}" method="post" class="dropdown-item-form">
-                                    {% csrf_token %}
-                                    <input name="next" type="hidden" value="{{ request.get_full_path }}" />
-                                    <button type="submit" name="language" value="en" class="dropdown-item {% if LANGUAGE_CODE == 'en' %}active{% endif %}">
-                                        English
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-
+                        <!-- قائمة تغيير اللغة -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-globe me-1"></i> {% if LANGUAGE_CODE == 'ar' %}العربية{% else %}English{% endif %}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <form action="{% url 'set_language' %}" method="post" class="dropdown-item-form">
+                                        {% csrf_token %}
+                                    <input name="next" type="hidden" value="/{% if LANGUAGE_CODE == 'ar' %}en{% else %}ar{% endif %}{{ request.path|cut:'/ar'|cut:'/en' }}" />
+                                        <button type="submit" name="language" value="ar" class="dropdown-item {% if LANGUAGE_CODE == 'ar' %}active{% endif %}">
+                                            العربية
+                                        </button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form action="{% url 'set_language' %}" method="post" class="dropdown-item-form">
+                                        {% csrf_token %}
+                                    <input name="next" type="hidden" value="/{% if LANGUAGE_CODE == 'ar' %}en{% else %}ar{% endif %}{{ request.path|cut:'/ar'|cut:'/en' }}" />
+                                        <button type="submit" name="language" value="en" class="dropdown-item {% if LANGUAGE_CODE == 'en' %}active{% endif %}">
+                                            English
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'accounts:logout' %}">
                             <i class="fas fa-sign-out-alt me-1"></i> {% trans "Logout" %}
