@@ -1,4 +1,5 @@
-/* نمط عام للصفحة */
+/* ملف CSS المخصص */
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     direction: rtl;
@@ -294,11 +295,11 @@ body {
     .table-responsive {
         font-size: 0.875rem;
     }
-    
+
     .stats-card {
         margin-bottom: 20px;
     }
-    
+
     .btn {
         padding: 8px 16px;
         font-size: 0.875rem;
@@ -323,12 +324,12 @@ canvas {
     .no-print {
         display: none !important;
     }
-    
+
     body {
         color: black !important;
         background: white !important;
     }
-    
+
     .card {
         box-shadow: none !important;
         border: 1px solid #ddd !important;
@@ -354,4 +355,58 @@ canvas {
 .spinner-border {
     width: 3rem;
     height: 3rem;
+}
+
+/* دعم RTL و LTR */
+[dir="rtl"] {
+    text-align: right;
+}
+
+[dir="ltr"] {
+    text-align: left;
+}
+
+/* إصلاح Bootstrap للغة العربية */
+[dir="rtl"] .navbar-nav {
+    margin-right: auto !important;
+    margin-left: 0 !important;
+}
+
+[dir="ltr"] .navbar-nav {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+}
+
+[dir="rtl"] .dropdown-menu {
+    text-align: right !important;
+    right: 0 !important;
+    left: auto !important;
+}
+
+[dir="ltr"] .dropdown-menu {
+    text-align: left !important;
+    left: 0 !important;
+    right: auto !important;
+}
+
+/* أزرار تبديل اللغة */
+.dropdown-item-form {
+    margin: 0;
+    padding: 0;
+}
+
+.dropdown-item-form .dropdown-item {
+    border: none;
+    background: none;
+    width: 100%;
+    padding: 0.25rem 1rem;
+}
+
+.dropdown-item-form .dropdown-item:hover {
+    background-color: #e9ecef;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
 }

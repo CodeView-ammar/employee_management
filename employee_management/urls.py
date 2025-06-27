@@ -7,6 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns  # Import i18n_patterns
 from django.shortcuts import redirect
+from django.views.i18n import set_language
 
 def redirect_to_dashboard(request):
     if request.user.is_authenticated:
@@ -23,6 +24,7 @@ urlpatterns += i18n_patterns(
     path('accounts/', include('accounts.urls')),
     path('employees/', include('employees.urls')),
     path('', include('employees.urls')),  # Redirect root to employees
+    path('set_language/', set_language, name='set_language'),
 )
 
 if settings.DEBUG:

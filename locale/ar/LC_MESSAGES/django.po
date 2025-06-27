@@ -1,4 +1,3 @@
-
 # Arabic Translation for Employee Management System
 msgid ""
 msgstr ""
@@ -12,9 +11,24 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
 
+msgid "Employee Management System"
+msgstr "نظام إدارة الموظفين"
+
+msgid "نظام إدارة الموظفين"
+msgstr "نظام إدارة الموظفين"
+
+msgid "شعار الشركة"
+msgstr "شعار الشركة"
+
 # Navigation
 msgid "Dashboard"
 msgstr "لوحة التحكم"
+
+msgid "Home"
+msgstr "الرئيسية"
+
+msgid "الرئيسية"
+msgstr "الرئيسية"
 
 msgid "Employees"
 msgstr "الموظفون"
@@ -28,25 +42,49 @@ msgstr "قائمة الموظفين"
 msgid "Reports"
 msgstr "التقارير"
 
+msgid "التقارير"
+msgstr "التقارير"
+
 msgid "General Reports"
+msgstr "التقارير العامة"
+
+msgid "التقارير العامة"
 msgstr "التقارير العامة"
 
 msgid "Comparison Report"
 msgstr "تقرير المقارنة"
 
+msgid "تقرير المقارنة"
+msgstr "تقرير المقارنة"
+
 msgid "Advanced Reports"
-msgstr "التقارير المتقدمة"
+msgstr "التقارير الشاملة"
+
+msgid "التقارير الشاملة"
+msgstr "التقارير الشاملة"
 
 msgid "Settings"
+msgstr "الإعدادات"
+
+msgid "الإعدادات"
 msgstr "الإعدادات"
 
 msgid "Import Excel"
 msgstr "استيراد Excel"
 
+msgid "استيراد Excel"
+msgstr "استيراد Excel"
+
 msgid "Admin Panel"
 msgstr "لوحة الإدارة"
 
+msgid "لوحة الإدارة"
+msgstr "لوحة الإدارة"
+
 msgid "Logout"
+msgstr "تسجيل الخروج"
+
+msgid "تسجيل الخروج"
 msgstr "تسجيل الخروج"
 
 # Employee Fields
