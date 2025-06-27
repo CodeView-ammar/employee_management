@@ -63,12 +63,12 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-3 col-md-6 mb-3">
+                        <!-- <div class="col-lg-3 col-md-6 mb-3">
                             <a href="{% url 'employees:employee_create' %}" class="btn btn-primary w-100 py-3">
                                 <i class="fas fa-user-plus fa-2x d-block mb-2"></i>
                                 إضافة موظف جديد
                             </a>
-                        </div>
+                        </div> -->
                         <div class="col-lg-3 col-md-6 mb-3">
                             <a href="{% url 'employees:employee_list' %}" class="btn btn-info w-100 py-3">
                                 <i class="fas fa-list fa-2x d-block mb-2"></i>
@@ -166,9 +166,9 @@
                                         <a href="{% url 'employees:employee_detail' employee.pk %}" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{% url 'employees:employee_edit' employee.pk %}" class="btn btn-sm btn-outline-warning">
+                                        <!-- <a href="{% url 'employees:employee_edit' employee.pk %}" class="btn btn-sm btn-outline-warning">
                                             <i class="fas fa-edit"></i>
-                                        </a>
+                                        </a> -->
                                     </td>
                                 </tr>
                                 {% endfor %}

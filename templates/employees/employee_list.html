@@ -17,10 +17,10 @@
                     <p class="text-muted">إدارة بيانات جميع الموظفين</p>
                 </div>
                 <div>
-                    <a href="{% url 'employees:employee_create' %}" class="btn btn-primary">
+                    <!-- <a href="{% url 'employees:employee_create' %}" class="btn btn-primary">
                         <i class="fas fa-user-plus me-2"></i>
                         إضافة موظف جديد
-                    </a>
+                    </a> -->
                     <a href="{% url 'employees:import_excel' %}" class="btn btn-success">
                         <i class="fas fa-file-excel me-2"></i>
                         استيراد من Excel
@@ -210,17 +210,17 @@
                                                        data-bs-toggle="tooltip" title="عرض التفاصيل">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{% url 'employees:employee_edit' employee.pk %}" 
+                                                    <!-- <a href="{% url 'employees:employee_edit' employee.pk %}" 
                                                        class="btn btn-sm btn-outline-warning" 
                                                        data-bs-toggle="tooltip" title="تعديل">
                                                         <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="{% url 'employees:employee_delete' employee.pk %}" 
+                                                    </a> -->
+                                                    <!-- <a href="{% url 'employees:employee_delete' employee.pk %}" 
                                                        class="btn btn-sm btn-outline-danger btn-delete" 
                                                        data-employee-name="{{ employee.name }}"
                                                        data-bs-toggle="tooltip" title="حذف">
                                                         <i class="fas fa-trash"></i>
-                                                    </a>
+                                                    </a> -->
                                                 </div>
                                             </td>
                                         </tr>

@@ -14,7 +14,7 @@ from io import BytesIO
 import xlsxwriter
 from datetime import datetime
 
-from .models import Employee, Allowance, AllowanceType
+from .models import Employee, Allowance, AllowanceType,EmployeeCategory
 from .forms import EmployeeForm, AllowanceFormSet, ReportFilterForm, ExcelImportForm
 from .utils import import_employees_from_excel, export_template_excel
 
@@ -448,18 +448,17 @@ def dashboard(request):
     total_monthly_cost = sum(emp.get_monthly_gross_salary() for emp in active_employees)
     total_annual_cost = sum(emp.get_annual_total_cost() for emp in active_employees)
     
-    # إحصائيات حسب الفئة
     category_stats = []
-    for category_code, category_name in Employee.CATEGORY_CHOICES:
-        count = Employee.objects.filter(category=category_code, is_active=True).count()
+    categories = EmployeeCategory.objects.all()
+
+    for category in categories:
+        count = Employee.objects.filter(category=category, is_active=True).count()
         if count > 0:
             category_stats.append({
-                'name': category_name,
+                'name': category.name,
                 'count': count,
                 'percentage': (count / total_employees * 100) if total_employees > 0 else 0
-            })
-    
-    # إحصائيات حسب الجنسية
+            })    # إحصائيات حسب الجنسية
     nationality_stats = []
     nationalities = Employee.objects.filter(is_active=True).values('nationality').annotate(
         count=Count('id')

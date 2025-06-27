@@ -20,8 +20,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'employees:dashboard' %}">
-                <i class="fas fa-users me-2"></i>
-                نظام إدارة الموظفين
+             <img src="{% static 'images/logo.png' %}" alt="شعار الشركة" style="height: 42px;width: 175px;" class="me-2">
+                    نظام إدارة الموظفين  
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -47,7 +47,7 @@
                             <i class="fas fa-chart-bar me-1"></i>
                             التقارير
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu" style="text-align: right;">
                             <li><a class="dropdown-item" href="{% url 'employees:reports' %}">
                                 <i class="fas fa-chart-line me-2"></i>
                                 التقارير العامة
@@ -62,12 +62,12 @@
                             </a></li>
                         </ul>
                     </li>
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown" >
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-cog me-1"></i>
                             الإعدادات
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu" style="text-align: right;">
                             <li><a class="dropdown-item" href="{% url 'employees:import_excel' %}">
                                 <i class="fas fa-upload me-2"></i>
                                 استيراد Excel
@@ -76,6 +76,11 @@
                                 <i class="fas fa-tools me-2"></i>
                                 لوحة الإدارة
                             </a></li>
+                        <li><a class="dropdown-item" href="{%url 'accounts:logout'%}">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            تسجيل الخروج
+                        </a></li>
+
                         </ul>
                     </li>
                 </ul>

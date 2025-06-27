@@ -4,7 +4,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Submit, HTML, Fieldset
 from crispy_forms.bootstrap import FormActions
 from .models import Employee, Allowance, AllowanceType
-
+from employees.models import EmployeeCategory
 
 class EmployeeForm(forms.ModelForm):
     class Meta:
@@ -115,13 +115,13 @@ class ReportFilterForm(forms.Form):
     )
     
     # تصفية بالفئة
-    category = forms.ChoiceField(
-        choices=[('', 'جميع الفئات')] + Employee.CATEGORY_CHOICES,
+    category = forms.ModelChoiceField(
+        queryset=EmployeeCategory.objects.all(),
         required=False,
+        empty_label="جميع الفئات",
         widget=forms.Select(attrs={'class': 'form-select'}),
         label='الفئة'
     )
-    
     # تصفية بالتاريخ
     date_from = forms.DateField(
         required=False,

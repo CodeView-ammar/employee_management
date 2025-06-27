@@ -1,11 +1,23 @@
 from django.contrib import admin
 from .models import Employee, AllowanceType, Allowance
 
+from django.contrib import admin
+from employees.models import EmployeeCategory
+
+admin.site.site_header = "نظام إدارة الموظفين"
+admin.site.site_title = "نظام إدارة الموظفين"
+admin.site.index_title = "لوحة التحكم"
 
 class AllowanceInline(admin.TabularInline):
     model = Allowance
     extra = 1
     fields = ['allowance_type', 'amount', 'type', 'notes', 'is_active']
+
+
+
+@admin.register(EmployeeCategory)
+class EmployeeCategoryAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(Employee)

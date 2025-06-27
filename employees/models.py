@@ -3,6 +3,12 @@ from django.core.validators import MinValueValidator
 from decimal import Decimal
 from datetime import datetime
 
+class EmployeeCategory(models.Model):
+    code = models.CharField(max_length=20, unique=True, verbose_name='رمز الفئة')
+    name = models.CharField(max_length=100, verbose_name='اسم الفئة')
+
+    def __str__(self):
+        return self.name
 
 class Employee(models.Model):
     """نموذج بيانات الموظف"""
@@ -16,18 +22,21 @@ class Employee(models.Model):
     ]
     
     INSURANCE_TYPE_CHOICES = [
-        ('BASIC', 'أساسي'),
-        ('COMPREHENSIVE', 'شامل'),
-        ('PREMIUM', 'ممتاز'),
+        ('VIP', 'VIP'),
+        ('A+', 'A+'),
+        ('A', 'A'),
+        ('B', 'B'),
+        ('C', 'C'),
     ]
-    
+   
     # البيانات الأساسية
     employee_number = models.CharField(max_length=20, unique=True, verbose_name='رقم الموظف')
     name = models.CharField(max_length=200, verbose_name='الاسم')
     nationality = models.CharField(max_length=100, verbose_name='الجنسية')
     hire_date = models.DateField(verbose_name='تاريخ التوظيف')
     id_number = models.CharField(max_length=50, verbose_name='رقم الهوية/الإقامة')
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, verbose_name='الفئة')
+    # category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, verbose_name='الفئة')
+    category = models.ForeignKey(EmployeeCategory, on_delete=models.SET_NULL, null=True, verbose_name='الفئة')
     basic_salary = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))], verbose_name='آخر راتب أساسي')
     insurance_type = models.CharField(max_length=20, choices=INSURANCE_TYPE_CHOICES, verbose_name='نوع التأمين الطبي')
     
