@@ -104,7 +104,7 @@
         }
         
         .company-logo {
-            max-width: 80px;
+            max-width: 239px;
             margin-bottom: 15px;
         }
         
@@ -250,7 +250,7 @@
         <!-- رأس التقرير -->
         <div class="report-header">
             {% load static %}
-            <img src="{% static 'images/logo.png' %}" alt="شعار الشركة" class="company-logo">
+            <img src="{% static 'images/logo_black.jpg' %}"  alt="شعار الشركة" class="company-logo">
             <h1 class="report-title">تقرير الموظفين الشامل</h1>
             <div class="report-date">
                 <i class="fas fa-calendar-alt me-2"></i>
@@ -298,14 +298,7 @@
                 </div>
             </div>
             
-            <div class="row g-2 mt-2">
-                <div class="col-lg-6 offset-lg-3 col-12">
-                    <div class="summary-card">
-                        <div class="summary-value">{{ avg_recruitment_cost|floatformat:0 }}</div>
-                        <div class="summary-label">متوسط تكلفة الاستقدام (ريال)</div>
-                    </div>
-                </div>
-            </div>
+
         </div>
 
         <!-- جدول الموظفين -->
