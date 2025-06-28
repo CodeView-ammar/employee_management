@@ -2,7 +2,7 @@ import openpyxl
 from datetime import datetime, date
 from decimal import Decimal, InvalidOperation
 from django.core.exceptions import ValidationError
-from .models import Employee, AllowanceType, Allowance
+from .models import Employee, Allowance, AllowanceType, EmployeeCategory
 import re
 
 def import_employees_from_excel(excel_file):
@@ -11,7 +11,7 @@ def import_employees_from_excel(excel_file):
     """
     wb = openpyxl.load_workbook(excel_file)
     ws = wb.active
-    
+
     # قراءة العناوين من الصف الأول
     headers = []
     for cell in ws[1]:
@@ -19,25 +19,25 @@ def import_employees_from_excel(excel_file):
             # إزالة (مطلوب) أو أي محتوى داخل أقواس
             clean_header = re.sub(r'\s*\(.*?\)', '', str(cell.value)).strip()
             headers.append(clean_header)
-    
+
     imported_count = 0
     allowances_count = 0
     errors = []
-    
+
     for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
         try:
             # تخطي الصفوف الفارغة
             if not any(row):
                 continue
-                
+
             employee_data, allowances_data = extract_employee_and_allowances_data(row, headers)
-            
+
             # التحقق من وجود الموظف
             employee, created = Employee.objects.get_or_create(
                 employee_number=employee_data['employee_number'],
                 defaults=employee_data
             )
-            
+
             if created:
                 imported_count += 1
             else:
@@ -45,7 +45,7 @@ def import_employees_from_excel(excel_file):
                 for key, value in employee_data.items():
                     setattr(employee, key, value)
                 employee.save()
-            
+
             # إضافة البدلات
             if allowances_data:
                 for allowance_data in allowances_data:
@@ -58,7 +58,7 @@ def import_employees_from_excel(excel_file):
                                 'frequency': allowance_data.get('frequency', 'MONTHLY')
                             }
                         )
-                        
+
                         # إضافة أو تحديث البدل
                         allowance, allowance_created = Allowance.objects.get_or_create(
                             employee=employee,
@@ -70,7 +70,7 @@ def import_employees_from_excel(excel_file):
                                 'is_active': True
                             }
                         )
-                        
+
                         if not allowance_created:
                             # تحديث البدل الموجود
                             allowance.amount = allowance_data['amount']
@@ -78,15 +78,15 @@ def import_employees_from_excel(excel_file):
                             allowance.notes = allowance_data.get('notes', '')
                             allowance.is_active = True
                             allowance.save()
-                        
+
                         allowances_count += 1
-                        
+
                     except Exception as allowance_error:
                         errors.append(f"الصف {row_num} - خطأ في البدل: {str(allowance_error)}")
-                
+
         except Exception as e:
             errors.append(f"الصف {row_num}: {str(e)}")
-    
+
     return {
         'imported_count': imported_count,
         'allowances_count': allowances_count,
@@ -100,7 +100,7 @@ def extract_employee_and_allowances_data(row, headers):
     """
     employee_data = {}
     allowances_data = []
-    
+
     # خريطة العناوين العربية والإنجليزية للموظف
     field_mapping = {
         'رقم الموظف': 'employee_number',
@@ -128,14 +128,14 @@ def extract_employee_and_allowances_data(row, headers):
         'تكلفة التدريب': 'training_cost',
         'training_cost': 'training_cost',
     }
-    
+
     # خريطة أعمدة البدلات (البحث عن الأعمدة التي تحتوي على "بدل")
     allowance_columns = {}
     for i, header in enumerate(headers):
         header_lower = header.lower()
         if any(keyword in header_lower for keyword in ['بدل', 'allowance', 'تعويض', 'علاوة']):
             allowance_columns[i] = header
-    
+
     # استخراج بيانات الموظف
     for i, header in enumerate(headers):
         if i < len(row) and row[i] is not None:
@@ -143,7 +143,7 @@ def extract_employee_and_allowances_data(row, headers):
             field_name = field_mapping.get(clean_header)
             if field_name:
                 value = row[i]
-                
+
                 # تحويل التواريخ
                 if field_name == 'hire_date':
                     if isinstance(value, datetime):
@@ -156,14 +156,14 @@ def extract_employee_and_allowances_data(row, headers):
                                 employee_data[field_name] = datetime.strptime(value, '%d/%m/%Y').date()
                             except:
                                 continue
-                
+
                 # تحويل الأرقام
                 elif field_name in ['basic_salary', 'recruitment_cost', 'training_cost']:
                     employee_data[field_name] = safe_decimal(value)
-                    
+
                 elif field_name in ['num_wives', 'num_children']:
                     employee_data[field_name] = safe_int(value)
-                    
+
                 # تحويل الفئة
                 elif field_name == 'category':
                     try:
@@ -172,7 +172,6 @@ def extract_employee_and_allowances_data(row, headers):
                     except EmployeeCategory.DoesNotExist:
                         employee_data[field_name] = None  # أو أي معالجة في حال لم تُوجد الفئة
 
-                    
                 # تحويل نوع التأمين
                 elif field_name == 'insurance_type':
                     insurance_mapping = {
@@ -181,10 +180,10 @@ def extract_employee_and_allowances_data(row, headers):
                         'ممتاز': 'PREMIUM',
                     }
                     employee_data[field_name] = insurance_mapping.get(str(value), str(value))
-                    
+
                 else:
                     employee_data[field_name] = str(value).strip() if value else ''
-    
+
     # استخراج بيانات البدلات
     for col_index, allowance_name in allowance_columns.items():
         if col_index < len(row) and row[col_index] is not None:
@@ -193,17 +192,17 @@ def extract_employee_and_allowances_data(row, headers):
                 # تحديد نوع البدل وتكراره بناءً على الاسم
                 frequency = 'MONTHLY'  # افتراضي
                 allowance_type = 'CASH'  # افتراضي
-                
+
                 # تحليل اسم البدل لتحديد التكرار والنوع
                 allowance_name_lower = allowance_name.lower()
                 if any(keyword in allowance_name_lower for keyword in ['سنوي', 'annual', 'yearly']):
                     frequency = 'ANNUAL'
                 elif any(keyword in allowance_name_lower for keyword in ['مرة', 'one_time', 'bonus']):
                     frequency = 'ONE_TIME'
-                
+
                 if any(keyword in allowance_name_lower for keyword in ['عيني', 'in_kind', 'benefit']):
                     allowance_type = 'IN_KIND'
-                
+
                 allowances_data.append({
                     'name': allowance_name,
                     'amount': allowance_amount,
@@ -211,7 +210,7 @@ def extract_employee_and_allowances_data(row, headers):
                     'type': allowance_type,
                     'notes': f'مستورد من Excel - {allowance_name}'
                 })
-    
+
     return employee_data, allowances_data
 
 
@@ -220,22 +219,22 @@ def extract_employee_data_from_row(row, headers):
     استخراج بيانات الموظف من صف Excel
     """
     data = {}
-    
+
     # إنشاء قاموس من البيانات
     row_data = {}
     for i, header in enumerate(headers):
         if i < len(row):
             row_data[header] = row[i]
-    
+
     # استخراج البيانات الأساسية
     try:
         data['employee_number'] = str(row_data.get('رقم الموظف', '')).strip()
         data['name'] = str(row_data.get('الاسم', '')).strip()
         data['nationality'] = str(row_data.get('الجنسية', '')).strip()
-        
+
         if not all([data['employee_number'], data['name'], data['nationality']]):
             return None
-        
+
         # الراتب الأساسي
         basic_salary = row_data.get('الراتب الأساسي', 0)
         if isinstance(basic_salary, (int, float)):
@@ -247,7 +246,7 @@ def extract_employee_data_from_row(row, headers):
                 data['basic_salary'] = Decimal('0')
         else:
             data['basic_salary'] = Decimal('0')
-        
+
         # تاريخ التوظيف
         hire_date = row_data.get('تاريخ التوظيف')
         if isinstance(hire_date, datetime):
@@ -264,16 +263,20 @@ def extract_employee_data_from_row(row, headers):
                     data['hire_date'] = date.today()
         else:
             data['hire_date'] = date.today()
-        
+
+        # الفئة
         category_name = str(row_data.get('الفئة', '')).strip()
 
         try:
             category_obj = EmployeeCategory.objects.get(name=category_name)
-            data['category'] = category_obj  # نمرر كائن الفئة مباشرة (ForeignKey)
+            data['category'] = category_obj  # لأن الحقل هو ForeignKey
         except EmployeeCategory.DoesNotExist:
-            data['category'] = None         # رقم الهوية
+            data['category'] = None  # أو يمكنك إنشاء الفئة تلقائيًا أو تجاهل السطر
+
+
+        # رقم الهوية
         data['id_number'] = str(row_data.get('رقم الهوية', '')).strip()
-        
+
         # نوع التأمين
         insurance_type = str(row_data.get('نوع التأمين', 'BASIC')).strip()
         insurance_mapping = {
@@ -282,22 +285,22 @@ def extract_employee_data_from_row(row, headers):
             'ممتاز': 'PREMIUM'
         }
         data['insurance_type'] = insurance_mapping.get(insurance_type, 'BASIC')
-        
+
         # عدد الزوجات والأبناء
         data['num_wives'] = safe_int(row_data.get('عدد الزوجات', 0))
         data['num_children'] = safe_int(row_data.get('عدد الأبناء', 0))
-        
+
         # التكاليف الإضافية
         data['recruitment_cost'] = safe_decimal(row_data.get('تكلفة الاستقدام', 0))
         data['training_cost'] = safe_decimal(row_data.get('تكلفة التدريب', 0))
-        
+
         # الحالة
         data['is_active'] = True
-        
+
     except Exception as e:
         print(f"خطأ في استخراج البيانات: {str(e)}")
         return None
-    
+
     return data
 
 
@@ -329,7 +332,7 @@ def safe_decimal(value, default=0):
 
 def create_default_allowance_types():
     """إنشاء أنواع البدلات الافتراضية"""
-    
+
     default_allowances = [
         {'name': 'housing_allowance', 'name_arabic': 'بدل السكن', 'frequency': 'MONTHLY'},
         {'name': 'transportation_allowance', 'name_arabic': 'بدل النقل', 'frequency': 'MONTHLY'},
@@ -346,9 +349,9 @@ def create_default_allowance_types():
         {'name': 'training_cost', 'name_arabic': 'تكلفة التدريب', 'frequency': 'ONE_TIME'},
         {'name': 'reentry_fees', 'name_arabic': 'رسوم إعادة الدخول', 'frequency': 'ANNUAL'},
     ]
-    
+
     created_count = 0
-    
+
     for allowance_data in default_allowances:
         allowance_type, created = AllowanceType.objects.get_or_create(
             name=allowance_data['name'],
@@ -358,10 +361,10 @@ def create_default_allowance_types():
                 'is_active': True
             }
         )
-        
+
         if created:
             created_count += 1
-    
+
     return created_count
 def export_template_excel(request):
     """إنشاء قالب Excel للاستيراد"""
