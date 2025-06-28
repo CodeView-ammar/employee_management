@@ -162,14 +162,12 @@ def extract_employee_and_allowances_data(row, headers):
                     
                 # تحويل الفئة
                 elif field_name == 'category':
-                    category_mapping = {
-                        'عمالة': 'LABOR',
-                        'موظفين': 'STAFF',
-                        'إداري': 'MANAGER',
-                        'مهندس': 'ENGINEER',
-                        'فني': 'TECHNICIAN',
-                    }
-                    employee_data[field_name] = category_mapping.get(str(value), str(value))
+                    try:
+                        category = EmployeeCategory.objects.get(name=str(value))
+                        employee_data[field_name] = category  # نمرر الكائن مباشرة
+                    except EmployeeCategory.DoesNotExist:
+                        employee_data[field_name] = None  # أو أي معالجة في حال لم تُوجد الفئة
+
                     
                 # تحويل نوع التأمين
                 elif field_name == 'insurance_type':

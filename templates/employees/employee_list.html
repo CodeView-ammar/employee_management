@@ -47,7 +47,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
@@ -64,7 +64,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
@@ -80,7 +80,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
@@ -122,11 +122,12 @@
                                 <select name="category" class="form-select">
                                     <option value="">جميع الفئات</option>
                                     {% for category in categories %}
-                                        <option value="{{ category.code }}" 
-                                                {% if category_filter == category.code %}selected{% endif %}>
-                                            {{ category.name }}
-                                        </option>
-                                    {% endfor %}
+                                            <option value="{{ category.code }}" 
+                                                    {% if category_filter == category.code %}selected{% endif %}>
+                                                {{ category.name }}
+                                            </option>
+                                        {% endfor %}
+
                                 </select>
                             </div>
                             <div class="col-lg-4 col-md-6 mb-3">
@@ -198,7 +199,7 @@
                                                 <span class="badge bg-info">{{ employee.nationality }}</span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary">{{ employee.category.name }}</span>
+                                                <span class="badge bg-primary">{{ employee.get_category_display }}</span>
                                             </td>
                                             <td>{{ employee.hire_date|date:"Y-m-d" }}</td>
                                             <td class="text-end">{{ employee.basic_salary|floatformat:2 }} ريال</td>
@@ -280,3 +281,52 @@
     </div>
 </div>
 {% endblock %}
+<div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">إجمالي التكلفة الشهرية</h4>
+                                    <h2 class="mb-0">{{ stats.total_monthly_cost|floatformat:0 }}</h2>
+                                    <small>ريال سعودي</small>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-dollar-sign fa-3x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">متوسط المعامل</h4>
+                                    <h2 class="mb-0">{{ stats.avg_cost_factor|floatformat:2 }}</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-calculator fa-3x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">متوسط تكلفة الاستقدام</h4>
+                                    <h2 class="mb-0">{{ stats.avg_recruitment_cost|floatformat:0 }}</h2>
+                                    <small>ريال سعودي</small>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-user-plus fa-3x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>

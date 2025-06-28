@@ -50,9 +50,21 @@ def employee_list(request):
     page_obj = paginator.get_page(page_number)
     
     # إحصائيات سريعة
+    active_employees = Employee.objects.filter(is_active=True)
+    total_employees = active_employees.count()
+    
+    # حساب متوسط المعامل ومتوسط تكلفة الاستقدام
+    avg_cost_factor = 0
+    avg_recruitment_cost = 0
+    if total_employees > 0:
+        avg_cost_factor = sum(emp.get_cost_factor() for emp in active_employees) / total_employees
+        avg_recruitment_cost = sum(emp.recruitment_cost for emp in active_employees) / total_employees
+    
     stats = {
-        'total_employees': Employee.objects.filter(is_active=True).count(),
-        'total_monthly_cost': sum(emp.get_monthly_gross_salary() for emp in Employee.objects.filter(is_active=True)),
+        'total_employees': total_employees,
+        'total_monthly_cost': sum(emp.get_monthly_gross_salary() for emp in active_employees),
+        'avg_cost_factor': avg_cost_factor,
+        'avg_recruitment_cost': avg_recruitment_cost,
         'categories': Employee.objects.values('category').annotate(count=Count('id')).order_by('category'),
         'nationalities': Employee.objects.values('nationality').annotate(count=Count('id')).order_by('nationality')
     }
@@ -63,7 +75,7 @@ def employee_list(request):
         'category_filter': category_filter,
         'nationality_filter': nationality_filter,
         'stats': stats,
-        'categories': EmployeeCategory.objects.all(), 
+        'categories': EmployeeCategory.objects.all(),
         'nationalities': Employee.objects.values_list('nationality', flat=True).distinct().order_by('nationality')
     }
     
@@ -263,11 +275,10 @@ def generate_report_data(employees):
     total_monthly_cost = sum(emp.get_monthly_gross_salary() for emp in employees)
     total_annual_cost = sum(emp.get_annual_total_cost() for emp in employees)
     avg_cost_factor = sum(emp.get_cost_factor() for emp in employees) / total_employees if total_employees > 0 else 0
-
-    # ✅ تجميع حسب الفئة (باستخدام جدول EmployeeCategory)
+    
+    # تجميع حسب الفئة
     by_category = {}
-    categories = EmployeeCategory.objects.all()
-    for category in categories:
+    for category in EmployeeCategory.objects.all():
         cat_employees = employees.filter(category=category)
         if cat_employees.exists():
             by_category[category.name] = {
@@ -275,8 +286,7 @@ def generate_report_data(employees):
                 'total_monthly': sum(emp.get_monthly_gross_salary() for emp in cat_employees),
                 'total_annual': sum(emp.get_annual_total_cost() for emp in cat_employees)
             }
-
-    # ✅ تجميع حسب الجنسية
+    # تجميع حسب الجنسية
     by_nationality = {}
     nationalities = employees.values_list('nationality', flat=True).distinct()
     for nationality in nationalities:
@@ -286,7 +296,7 @@ def generate_report_data(employees):
             'total_monthly': sum(emp.get_monthly_gross_salary() for emp in nat_employees),
             'total_annual': sum(emp.get_annual_total_cost() for emp in nat_employees)
         }
-
+    
     return {
         'summary': {
             'total_employees': total_employees,
@@ -298,6 +308,7 @@ def generate_report_data(employees):
         'by_nationality': by_nationality,
         'employees': employees
     }
+
 
 @login_required
 def export_excel(request):
@@ -363,7 +374,7 @@ def export_excel(request):
         worksheet.write(row, 0, employee.employee_number, data_format)
         worksheet.write(row, 1, employee.name, data_format)
         worksheet.write(row, 2, employee.nationality, data_format)
-        worksheet.write(row, 3, employee.category.name, data_format)
+        worksheet.write(row, 3, employee.get_category_display(), data_format)
         worksheet.write(row, 4, employee.hire_date.strftime('%Y-%m-%d'), data_format)
         worksheet.write(row, 5, float(employee.basic_salary), number_format)
         worksheet.write(row, 6, float(employee.get_total_monthly_allowances()), number_format)

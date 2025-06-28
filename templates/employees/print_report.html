@@ -1,0 +1,430 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير الموظفين - {{ print_date|date:"d/m/Y" }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Amiri', serif;
+            font-size: 14px;
+            line-height: 1.4;
+            background: white;
+            color: #000;
+        }
+        
+        .container-fluid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                font-size: 11px;
+                line-height: 1.3;
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .container-fluid {
+                max-width: none;
+                padding: 10px;
+                margin: 0;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+            
+            .table {
+                font-size: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .table th,
+            .table td {
+                padding: 4px !important;
+                border: 1px solid #000 !important;
+                vertical-align: middle;
+            }
+            
+            .card {
+                border: 1px solid #000 !important;
+                box-shadow: none !important;
+                margin-bottom: 15px;
+            }
+            
+            .summary-cards .row {
+                margin: 0;
+            }
+            
+            .summary-card {
+                break-inside: avoid;
+                margin-bottom: 10px;
+                border: 1px solid #000;
+                padding: 10px;
+            }
+            
+            .report-header {
+                margin-bottom: 20px;
+                break-inside: avoid;
+            }
+            
+            .employee-table {
+                break-inside: avoid;
+            }
+            
+            .signature-section {
+                page-break-inside: avoid;
+                margin-top: 30px;
+            }
+            
+            @page {
+                margin: 1cm;
+                size: A4;
+            }
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 20px;
+        }
+        
+        .company-logo {
+            max-width: 80px;
+            margin-bottom: 15px;
+        }
+        
+        .report-title {
+            color: #007bff;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .report-date {
+            color: #6c757d;
+            font-size: 16px;
+        }
+        
+        .summary-cards {
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+            break-inside: avoid;
+        }
+        
+        .summary-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+        
+        .summary-label {
+            color: #6c757d;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .employee-table {
+            margin-top: 20px;
+        }
+        
+        .table th {
+            background-color: #007bff !important;
+            color: white !important;
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #fff !important;
+        }
+        
+        .table td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 6px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 123, 255, 0.1) !important;
+        }
+        
+        .badge {
+            font-size: 10px;
+            padding: 3px 6px;
+            border: 1px solid;
+        }
+        
+        .badge.bg-info {
+            background-color: #17a2b8 !important;
+            color: white !important;
+        }
+        
+        .badge.bg-primary {
+            background-color: #007bff !important;
+            color: white !important;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            color: #6c757d;
+            font-size: 10px;
+            break-inside: avoid;
+        }
+        
+        .signature-section {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .signature-box {
+            text-align: center;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            flex: 1;
+            min-width: 150px;
+            background: white;
+        }
+        
+        .signature-line {
+            height: 40px;
+            border-bottom: 1px solid #000;
+            margin-bottom: 10px;
+        }
+        
+        .print-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- أزرار التحكم -->
+        <div class="print-controls no-print">
+            <button onclick="window.print()" class="btn btn-primary btn-sm">
+                <i class="fas fa-print me-2"></i>
+                طباعة
+            </button>
+            <button onclick="window.close()" class="btn btn-secondary btn-sm">
+                <i class="fas fa-times me-2"></i>
+                إغلاق
+            </button>
+        </div>
+
+        <!-- رأس التقرير -->
+        <div class="report-header">
+            {% load static %}
+            <img src="{% static 'images/logo.png' %}" alt="شعار الشركة" class="company-logo">
+            <h1 class="report-title">تقرير الموظفين الشامل</h1>
+            <div class="report-date">
+                <i class="fas fa-calendar-alt me-2"></i>
+                تاريخ التقرير: {{ print_date|date:"d/m/Y - H:i" }}
+            </div>
+            {% if filters %}
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-filter me-1"></i>
+                        تم تطبيق مرشحات على التقرير
+                    </small>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ملخص الإحصائيات -->
+        <div class="summary-cards">
+            <div class="row g-2">
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="summary-card">
+                        <div class="summary-value">{{ total_employees }}</div>
+                        <div class="summary-label">إجمالي الموظفين</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="summary-card">
+                        <div class="summary-value">{{ total_monthly_cost|floatformat:0 }}</div>
+                        <div class="summary-label">التكلفة الشهرية (ريال)</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="summary-card">
+                        <div class="summary-value">{{ total_annual_cost|floatformat:0 }}</div>
+                        <div class="summary-label">التكلفة السنوية (ريال)</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="summary-card">
+                        <div class="summary-value">{{ avg_cost_factor|floatformat:2 }}</div>
+                        <div class="summary-label">متوسط المعامل</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-2 mt-2">
+                <div class="col-lg-6 offset-lg-3 col-12">
+                    <div class="summary-card">
+                        <div class="summary-value">{{ avg_recruitment_cost|floatformat:0 }}</div>
+                        <div class="summary-label">متوسط تكلفة الاستقدام (ريال)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- جدول الموظفين -->
+        <div class="employee-table">
+            <h3 class="mb-3" style="color: #007bff; font-size: 18px;">
+                <i class="fas fa-users me-2"></i>
+                تفاصيل الموظفين ({{ total_employees }} موظف)
+            </h3>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="width: 6%;">م</th>
+                            <th style="width: 12%;">رقم الموظف</th>
+                            <th style="width: 20%;">الاسم</th>
+                            <th style="width: 10%;">الجنسية</th>
+                            <th style="width: 10%;">الفئة</th>
+                            <th style="width: 12%;">تاريخ التوظيف</th>
+                            <th style="width: 12%;">الراتب الأساسي</th>
+                            <th style="width: 12%;">التكلفة السنوية</th>
+                            <th style="width: 8%;">المعامل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for employee in employees %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><strong>{{ employee.employee_number }}</strong></td>
+                                <td style="text-align: right; padding-right: 8px;">{{ employee.name }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ employee.nationality }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ employee.get_category_display }}</span>
+                                </td>
+                                <td>{{ employee.hire_date|date:"d/m/Y" }}</td>
+                                <td>{{ employee.basic_salary|floatformat:0 }}</td>
+                                <td>{{ employee.get_annual_total_cost|floatformat:0 }}</td>
+                                <td>{{ employee.get_cost_factor|floatformat:2 }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center text-muted">
+                                    لا توجد بيانات للعرض
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- قسم التوقيعات -->
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <strong>إعداد التقرير</strong><br>
+                <small>قسم الموارد البشرية</small><br>
+                <small>التاريخ: {{ print_date|date:"d/m/Y" }}</small>
+            </div>
+            
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <strong>مراجعة التقرير</strong><br>
+                <small>مدير الموارد البشرية</small><br>
+                <small>التاريخ: ___/___/______</small>
+            </div>
+            
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <strong>اعتماد التقرير</strong><br>
+                <small>الإدارة العليا</small><br>
+                <small>التاريخ: ___/___/______</small>
+            </div>
+        </div>
+
+        <!-- تذييل الصفحة -->
+        <div class="footer">
+            <div class="row">
+                <div class="col-4">
+                    <i class="fas fa-print me-1"></i>
+                    تاريخ الطباعة: {{ print_date|date:"d/m/Y H:i" }}
+                </div>
+                <div class="col-4 text-center">
+                    <strong>نظام إدارة الموظفين</strong>
+                </div>
+                <div class="col-4 text-end">
+                    <i class="fas fa-users me-1"></i>
+                    عدد الموظفين: {{ total_employees }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // وظائف الطباعة المحسنة
+        function printReport() {
+            window.print();
+        }
+        
+        // التحقق من حالة الطباعة
+        window.addEventListener('beforeprint', function() {
+            document.body.style.backgroundColor = 'white';
+        });
+        
+        window.addEventListener('afterprint', function() {
+            // يمكن إضافة وظائف ما بعد الطباعة هنا
+        });
+        
+        // طباعة تلقائية عند الطلب (يمكن تفعيلها)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('auto_print') === 'true') {
+            window.onload = function() { 
+                setTimeout(function() {
+                    window.print();
+                }, 1000);
+            };
+        }
+    </script>
+</body>
+</html>

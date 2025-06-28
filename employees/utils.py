@@ -166,14 +166,12 @@ def extract_employee_and_allowances_data(row, headers):
                     
                 # تحويل الفئة
                 elif field_name == 'category':
-                    category_mapping = {
-                        'عمالة': 'LABOR',
-                        'موظفين': 'STAFF',
-                        'إداري': 'MANAGER',
-                        'مهندس': 'ENGINEER',
-                        'فني': 'TECHNICIAN',
-                    }
-                    employee_data[field_name] = category_mapping.get(str(value), str(value))
+                    try:
+                        category = EmployeeCategory.objects.get(name=str(value))
+                        employee_data[field_name] = category  # نمرر الكائن مباشرة
+                    except EmployeeCategory.DoesNotExist:
+                        employee_data[field_name] = None  # أو أي معالجة في حال لم تُوجد الفئة
+
                     
                 # تحويل نوع التأمين
                 elif field_name == 'insurance_type':
@@ -267,18 +265,13 @@ def extract_employee_data_from_row(row, headers):
         else:
             data['hire_date'] = date.today()
         
-        # الفئة
-        category = str(row_data.get('الفئة', 'STAFF')).strip().upper()
-        category_mapping = {
-            'عمالة': 'LABOR',
-            'موظفين': 'STAFF',
-            'إداري': 'MANAGER',
-            'مهندس': 'ENGINEER',
-            'فني': 'TECHNICIAN'
-        }
-        data['category'] = category_mapping.get(category, 'STAFF')
-        
-        # رقم الهوية
+        category_name = str(row_data.get('الفئة', '')).strip()
+
+        try:
+            category_obj = EmployeeCategory.objects.get(name=category_name)
+            data['category'] = category_obj  # نمرر كائن الفئة مباشرة (ForeignKey)
+        except EmployeeCategory.DoesNotExist:
+            data['category'] = None         # رقم الهوية
         data['id_number'] = str(row_data.get('رقم الهوية', '')).strip()
         
         # نوع التأمين

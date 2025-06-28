@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load math_filters %}
-{% load currency_filters %}
 {% load i18n %}
 
 {% block title %}{% trans "Comparison Report" %} - {% trans "Employee Management System" %}{% endblock %}
@@ -90,7 +89,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
@@ -109,7 +108,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
@@ -128,18 +127,18 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
                             <h4 class="card-title">{% trans "Average Cost" %}</h4>
-                            {% with total_cost=0 count=comparison_data|length %}
+                            {% with total_cost=0 %}
                                 {% for data in comparison_data %}
-                                    {% with total_cost=total_cost|add_filter:data.annual_cost %}{% endwith %}
+                                    {% with total_cost=total_cost|add:data.annual_cost %}{% endwith %}
                                 {% endfor %}
-                                <h2 class="mb-0">{{ total_cost|div:count|floatformat:0 }}</h2>
+                                <h2 class="mb-0">{{ total_cost|div:comparison_data|length|floatformat:0 }}</h2>
                                 <small>{% trans "SAR" %}</small>
                             {% endwith %}
                         </div>
@@ -147,6 +146,23 @@
                             <i class="fas fa-calculator fa-3x opacity-75"></i>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        {% trans "Cost Comparison Chart" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="comparisonChart" height="100"></canvas>
                 </div>
             </div>
         </div>
@@ -162,11 +178,19 @@
                         {% trans "Detailed Comparison" %}
                     </h5>
                     <div>
-                        <button class="btn btn-success btn-sm" onclick="window.print()">
-                            <i class="fas fa-print me-2"></i>
-                            {% trans "Print" %}
-                        </button>
-                    </div>
+                    <a href="{% url 'employees:export_excel' %}{% if filters %}?{% for key, value in filters.items %}{{ key }}={{ value }}{% if not forloop.last %}&{% endif %}{% endfor %}{% endif %}" class="btn btn-success">
+                        <i class="fas fa-file-excel me-2"></i>
+                        تصدير إلى Excel
+                    </a>
+                    <a href="{% url 'employees:print_comparison_report' %}{% if filters %}?{% for key, value in filters.items %}{{ key }}={{ value }}{% if not forloop.last %}&{% endif %}{% endfor %}{% endif %}" class="btn btn-primary" target="_blank">
+                        <i class="fas fa-print me-2"></i>
+                        طباعة التقرير
+                    </a>
+                    <a href="{% url 'employees:reports' %}" class="btn btn-info">
+                        <i class="fas fa-chart-line me-2"></i>
+                        التقارير العامة
+                    </a>
+                </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -201,7 +225,7 @@
                                     </td>
                                     <td>
                                         <span class="badge bg-secondary">
-                                            {{ data.employee.category.name }}
+                                            {{ data.employee.get_category_display }}
                                         </span>
                                     </td>
                                     <td>{{ data.employee.nationality }}</td>
@@ -261,4 +285,125 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Comparison Chart
+    {% if comparison_data %}
+    const comparisonData = [
+        {% for data in comparison_data %}
+        {
+            name: "{{ data.employee.name|truncatechars:15 }}",
+            annual_cost: {{ data.annual_cost|floatformat:0 }},
+            efficiency: {{ data.efficiency_ratio|floatformat:2 }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const ctx = document.getElementById('comparisonChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: comparisonData.map(item => item.name),
+            datasets: [{
+                label: '{% trans "Annual Cost" %} ({% trans "SAR" %})',
+                data: comparisonData.map(item => item.annual_cost),
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                yAxisID: 'y'
+            }, {
+                label: '{% trans "Efficiency Ratio" %}',
+                data: comparisonData.map(item => item.efficiency),
+                type: 'line',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                fill: false,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: '{% trans "Employees" %}'
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: '{% trans "Annual Cost" %} ({% trans "SAR" %})'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: '{% trans "Efficiency Ratio" %}'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                    min: 0,
+                    max: 1
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.datasetIndex === 0) {
+                                return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' {% trans "SAR" %}';
+                            } else {
+                                return context.dataset.label + ': ' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+});
+
+function exportToExcel() {
+    // Simple table to Excel export
+    const table = document.getElementById('comparisonTable');
+    const ws = XLSX.utils.table_to_sheet(table);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "{% trans 'Comparison Report' %}");
+    XLSX.writeFile(wb, "employee_comparison_report.xlsx");
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 {% endblock %}
