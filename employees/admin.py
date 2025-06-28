@@ -38,9 +38,6 @@ class EmployeeAdmin(admin.ModelAdmin):
         ('بيانات العائلة', {
             'fields': ('num_wives', 'num_children')
         }),
-        ('التكاليف الإضافية', {
-            'fields': ('recruitment_cost', 'training_cost')
-        }),
         ('معلومات النظام', {
             'fields': ('is_active', 'created_at', 'updated_at'),
             'classes': ('collapse',)

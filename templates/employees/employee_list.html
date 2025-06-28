@@ -121,10 +121,10 @@
                                 <label class="form-label">الفئة</label>
                                 <select name="category" class="form-select">
                                     <option value="">جميع الفئات</option>
-                                    {% for category_code, category_name in categories %}
-                                        <option value="{{ category_code }}" 
-                                                {% if category_filter == category_code %}selected{% endif %}>
-                                            {{ category_name }}
+                                    {% for category in categories %}
+                                        <option value="{{ category.code }}" 
+                                                {% if category_filter == category.code %}selected{% endif %}>
+                                            {{ category.name }}
                                         </option>
                                     {% endfor %}
                                 </select>

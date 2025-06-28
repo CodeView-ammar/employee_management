@@ -123,10 +123,7 @@ def extract_employee_and_allowances_data(row, headers):
         'num_wives': 'num_wives',
         'عدد الأبناء': 'num_children',
         'num_children': 'num_children',
-        'تكلفة الاستقدام': 'recruitment_cost',
-        'recruitment_cost': 'recruitment_cost',
-        'تكلفة التدريب': 'training_cost',
-        'training_cost': 'training_cost',
+
     }
     
     # خريطة أعمدة البدلات (البحث عن الأعمدة التي تحتوي على "بدل")
@@ -157,7 +154,7 @@ def extract_employee_and_allowances_data(row, headers):
                                 continue
                 
                 # تحويل الأرقام
-                elif field_name in ['basic_salary', 'recruitment_cost', 'training_cost']:
+                elif field_name in ['basic_salary']:
                     employee_data[field_name] = safe_decimal(value)
                     
                 elif field_name in ['num_wives', 'num_children']:

@@ -12,7 +12,7 @@ class EmployeeForm(forms.ModelForm):
         fields = [
             'employee_number', 'name', 'nationality', 'hire_date', 'id_number',
             'category', 'basic_salary', 'insurance_type', 'num_wives', 'num_children',
-            'recruitment_cost', 'training_cost', 'photo', 'is_active'
+             'photo', 'is_active'
         ]
         widgets = {
             'hire_date': forms.DateInput(attrs={'type': 'date'}),
@@ -57,13 +57,7 @@ class EmployeeForm(forms.ModelForm):
                     Column('num_children', css_class='form-group col-md-6 mb-3'),
                 ),
             ),
-            Fieldset(
-                'التكاليف الإضافية',
-                Row(
-                    Column('recruitment_cost', css_class='form-group col-md-6 mb-3'),
-                    Column('training_cost', css_class='form-group col-md-6 mb-3'),
-                ),
-            ),
+            
             FormActions(
                 Submit('submit', 'حفظ', css_class='btn btn-primary'),
                 HTML('<a href="{% url "employees:employee_list" %}" class="btn btn-secondary">إلغاء</a>'),

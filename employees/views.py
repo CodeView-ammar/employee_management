@@ -63,7 +63,7 @@ def employee_list(request):
         'category_filter': category_filter,
         'nationality_filter': nationality_filter,
         'stats': stats,
-        'categories': Employee.CATEGORY_CHOICES,
+        'categories': EmployeeCategory.objects.all(), 
         'nationalities': Employee.objects.values_list('nationality', flat=True).distinct().order_by('nationality')
     }
     
