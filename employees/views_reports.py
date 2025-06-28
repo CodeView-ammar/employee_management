@@ -249,7 +249,7 @@ def export_individual_report(request, employee_id):
     basic_data = [
         ('الاسم', employee.name),
         ('الجنسية', employee.nationality),
-        ('الفئة', employee.get_category_display()),
+        ('الفئة', employee.category.name if employee.category else ''),
         ('تاريخ التوظيف', employee.hire_date.strftime('%Y-%m-%d')),
         ('الراتب الأساسي', employee.basic_salary),
     ]
